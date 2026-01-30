@@ -11,7 +11,8 @@ function buildPlayerContext(playerMap: PlayerConfig[]): string {
 
   let context = "## Players\n";
   if (dm) {
-    context += `- DM: ${dm.playerName}\n`;
+    const dmName = dm.characterName ?? "Dungeon Master";
+    context += `- ${dm.playerName} is the DM (referred to as "${dmName}")\n`;
   }
   for (const p of players) {
     context += `- ${p.playerName} plays ${p.characterName ?? "unknown character"}\n`;
@@ -30,7 +31,7 @@ function formatTranscriptEntries(
       );
       const speakerLabel =
         character?.role === "dm"
-          ? `[DM] ${entry.speaker}`
+          ? `[DM] ${entry.speaker} (${character.characterName ?? "Dungeon Master"})`
           : character?.characterName
             ? `${entry.speaker} (${character.characterName})`
             : entry.speaker;
@@ -194,9 +195,14 @@ ${detailsText}
 
 Organize the extracted information into a polished session recap.
 
+**CRITICAL - Use CHARACTER NAMES, not player names:**
+- Always use the character name or role (e.g., "DM", "Dungeon Master", "Aurelion") instead of player names (e.g., "Micco Fay", "Samuel Frost")
+- For the DM, use their display name (usually "DM" or "Dungeon Master") as shown in the Players section above
+- This applies to ALL fields: characters, participants, speakers, etc.
+
 ### 1. SCENES
 Create the final scene list with:
-- name, characters, locations (can be multiple), enemies
+- name, characters (use CHARACTER names), locations (can be multiple), enemies
 
 ### 2. OPENING CONTEXT
 Describe:
@@ -208,6 +214,7 @@ For EACH scene, create highlights with NESTED sub-bullets for related events:
 - Group sequential or related events together
 - Use sub-bullets for details (e.g., purchases, combat actions, discoveries)
 - Preserve ALL specific details: exact item names, gold amounts, character actions
+- Use CHARACTER names, not player names
 
 Example format:
 - "The party visited The Gilded Gnome magic shop"
@@ -216,10 +223,13 @@ Example format:
 
 ### 4. LEGACY HIGHLIGHTS
 Provide 5-8 categorized highlights (combat, roleplay, discovery, decision, humor).
+- Use CHARACTER names for participants
 
 ### 5. QUOTES
 Select the 3-5 best quotes from all extracted quotes.
+- Use CHARACTER name as speaker (not player name)
 
 ### 6. NARRATIVE
-Write 2-3 paragraphs telling the session's story.`;
+Write 2-3 paragraphs telling the session's story.
+- Refer to characters by their CHARACTER names`;
 }

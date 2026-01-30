@@ -26,7 +26,10 @@ export function PlayerConfigEditor({
 
     const newPlayer: PlayerConfig = {
       playerName: newPlayerName.trim(),
-      characterName: newRole === "dm" ? null : newCharacterName.trim() || null,
+      // DMs default to "Dungeon Master" as their character name if not specified
+      characterName: newRole === "dm"
+        ? (newCharacterName.trim() || "Dungeon Master")
+        : (newCharacterName.trim() || null),
       role: newRole,
     };
 
@@ -96,14 +99,16 @@ export function PlayerConfigEditor({
                   </span>
                 </div>
                 <Input
-                  placeholder={player.role === "dm" ? "—" : "Character name"}
+                  placeholder={player.role === "dm" ? "Dungeon Master" : "Character name"}
                   value={player.characterName ?? ""}
                   onChange={(e) =>
                     handleUpdatePlayer(player.playerName, {
-                      characterName: e.target.value || null,
+                      // For DMs, empty input defaults to "Dungeon Master"
+                      characterName: player.role === "dm"
+                        ? (e.target.value || "Dungeon Master")
+                        : (e.target.value || null),
                     })
                   }
-                  disabled={player.role === "dm"}
                   className="h-8 inset-field text-sm"
                 />
               </div>
@@ -156,12 +161,13 @@ export function PlayerConfigEditor({
             />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">Character Name</Label>
+            <Label className="text-xs text-muted-foreground">
+              {newRole === "dm" ? "Display Name" : "Character Name"}
+            </Label>
             <Input
-              placeholder={newRole === "dm" ? "—" : "Character name"}
+              placeholder={newRole === "dm" ? "Dungeon Master" : "Character name"}
               value={newCharacterName}
               onChange={(e) => setNewCharacterName(e.target.value)}
-              disabled={newRole === "dm"}
               className="h-9 inset-field"
             />
           </div>

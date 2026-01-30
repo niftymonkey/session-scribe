@@ -72,6 +72,7 @@ export function ImportPanel({
           metadata={
             diceLog
               ? {
+                  title: diceLog.filename,
                   rollCount: diceLog.rollCount,
                   characters: diceLog.characters,
                 }

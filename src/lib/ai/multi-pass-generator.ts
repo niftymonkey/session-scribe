@@ -98,7 +98,7 @@ async function extractSceneDetails(
 
 /**
  * Pass 2: Extract details for all scenes
- * - If <= PARALLEL_THRESHOLD scenes: process all in parallel
+ * - If <= PARALLEL_THRESHOLD scenes: process all in parallel with progress tracking
  * - If > PARALLEL_THRESHOLD scenes: process in batches to avoid rate limits
  */
 async function runPass2(
@@ -109,25 +109,40 @@ async function runPass2(
   playerMap: PlayerConfig[],
   onProgress?: (progress: RecapGenerationProgress) => void
 ): Promise<SceneDetails[]> {
-  // For small scene counts, process all in parallel
+  // For small scene counts, process all in parallel with completion tracking
   if (scenes.length <= PARALLEL_THRESHOLD) {
+    let completedCount = 0;
+
     onProgress?.({
       stage: "summarizing",
       passName: "extraction",
-      currentScene: 1,
+      currentScene: 0,
       totalScenes: scenes.length,
-      message: `Pass 2: Extracting details for ${scenes.length} scenes...`,
+      message: `Pass 2: Extracting details for ${scenes.length} scenes (0/${scenes.length} complete)...`,
     });
 
-    return Promise.all(
-      scenes.map((scene) =>
-        extractSceneDetails(model, systemPrompt, entries, scene, playerMap)
-      )
+    const results = await Promise.all(
+      scenes.map(async (scene, index) => {
+        const result = await extractSceneDetails(model, systemPrompt, entries, scene, playerMap);
+        completedCount++;
+        onProgress?.({
+          stage: "summarizing",
+          passName: "extraction",
+          currentScene: completedCount,
+          totalScenes: scenes.length,
+          message: `Pass 2: Extracting details (${completedCount}/${scenes.length} complete)...`,
+        });
+        return { index, result };
+      })
     );
+
+    // Sort by original index to maintain order
+    return results.sort((a, b) => a.index - b.index).map((r) => r.result);
   }
 
   // For larger scene counts, process in batches to avoid rate limits
   const results: SceneDetails[] = [];
+  let completedCount = 0;
 
   for (let i = 0; i < scenes.length; i += PASS2_CONCURRENCY) {
     const batch = scenes.slice(i, i + PASS2_CONCURRENCY);
@@ -135,9 +150,9 @@ async function runPass2(
     onProgress?.({
       stage: "summarizing",
       passName: "extraction",
-      currentScene: i + 1,
+      currentScene: completedCount,
       totalScenes: scenes.length,
-      message: `Pass 2: Extracting details for scenes ${i + 1}-${Math.min(i + PASS2_CONCURRENCY, scenes.length)} of ${scenes.length}...`,
+      message: `Pass 2: Extracting scenes ${i + 1}-${Math.min(i + PASS2_CONCURRENCY, scenes.length)} (${completedCount}/${scenes.length} complete)...`,
     });
 
     const batchResults = await Promise.all(
@@ -147,6 +162,7 @@ async function runPass2(
     );
 
     results.push(...batchResults);
+    completedCount += batchResults.length;
   }
 
   return results;

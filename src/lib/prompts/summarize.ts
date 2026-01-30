@@ -248,7 +248,8 @@ function buildPlayerContext(playerMap: PlayerConfig[]): string {
 
   let context = "## Players\n";
   if (dm) {
-    context += `- DM: ${dm.playerName}\n`;
+    const dmName = dm.characterName ?? "Dungeon Master";
+    context += `- ${dm.playerName} is the DM (referred to as "${dmName}")\n`;
   }
   for (const p of players) {
     context += `- ${p.playerName} plays ${p.characterName ?? "unknown character"}\n`;
@@ -263,7 +264,7 @@ function formatTranscriptEntries(entries: TranscriptEntry[], playerMap: PlayerCo
         p => p.playerName.toLowerCase() === entry.speaker.toLowerCase()
       );
       const speakerLabel = character?.role === "dm"
-        ? `[DM] ${entry.speaker}`
+        ? `[DM] ${entry.speaker} (${character.characterName ?? "Dungeon Master"})`
         : character?.characterName
           ? `${entry.speaker} (${character.characterName})`
           : entry.speaker;

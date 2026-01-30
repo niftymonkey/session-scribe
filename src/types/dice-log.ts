@@ -20,4 +20,5 @@ export interface DiceLogData {
   entries: DiceLogEntry[];
   characters: string[];
   rollCount: number;
+  filename?: string;
 }

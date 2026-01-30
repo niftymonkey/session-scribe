@@ -87,7 +87,10 @@ export function useFileImport(): UseFileImportResult {
       const content = await readTextFile(filePath as string);
       const parsed = parseDiceLog(content);
 
-      setDiceLog(parsed);
+      // Extract filename from path
+      const filename = (filePath as string).split(/[/\\]/).pop() ?? undefined;
+
+      setDiceLog({ ...parsed, filename });
       setDiceLogState("success");
     } catch (error) {
       console.error("Failed to import dice log:", error);
