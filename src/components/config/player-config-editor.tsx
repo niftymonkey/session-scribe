@@ -65,99 +65,75 @@ export function PlayerConfigEditor({
 
       {/* Existing players */}
       {players.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {players.map((player, index) => (
             <div
               key={index}
               className={cn(
-                "rounded-lg border p-4 transition-colors",
+                "group flex items-center gap-2 rounded-md border px-3 py-2 transition-all",
                 player.role === "dm"
-                  ? "bg-accent/5 border-accent/25"
-                  : "bg-card/50 border-border/40"
+                  ? "bg-accent/5 border-accent/30"
+                  : "bg-card/30 border-border/30 hover:border-border/50"
               )}
             >
-              <div className="flex items-start gap-3">
-                {/* Role indicator */}
-                <div className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-1",
-                  player.role === "dm" ? "bg-accent/10" : "bg-secondary/40"
-                )}>
-                  {player.role === "dm" ? (
-                    <Crown className="h-4 w-4 text-accent" />
-                  ) : (
-                    <Sword className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
+              {/* Role toggle - clickable icon */}
+              <button
+                onClick={() =>
+                  handleUpdatePlayer(index, {
+                    role: player.role === "dm" ? "player" : "dm",
+                  })
+                }
+                className={cn(
+                  "flex items-center justify-center w-7 h-7 rounded-md transition-all shrink-0",
+                  player.role === "dm"
+                    ? "bg-accent/15 text-accent hover:bg-accent/25"
+                    : "bg-secondary/40 text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                )}
+                title={
+                  player.role === "dm"
+                    ? "Dungeon Master (click to change)"
+                    : "Player (click to change)"
+                }
+              >
+                {player.role === "dm" ? (
+                  <Crown className="h-3.5 w-3.5" />
+                ) : (
+                  <Sword className="h-3.5 w-3.5" />
+                )}
+              </button>
 
-                {/* Editable fields */}
-                <div className="flex-1 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs text-muted-foreground mb-1 block">
-                        Player Name
-                      </Label>
-                      <Input
-                        value={player.playerName}
-                        onChange={(e) =>
-                          handleUpdatePlayer(index, { playerName: e.target.value })
-                        }
-                        placeholder="Real name"
-                        className="h-8 inset-field text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground mb-1 block">
-                        {player.role === "dm" ? "Display Name" : "Character Name"}
-                      </Label>
-                      <Input
-                        value={player.characterName ?? ""}
-                        onChange={(e) =>
-                          handleUpdatePlayer(index, {
-                            characterName: e.target.value || null,
-                          })
-                        }
-                        placeholder={player.role === "dm" ? "Dungeon Master" : "Character name"}
-                        className="h-8 inset-field text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Role toggle */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Role:</span>
-                    <div className="flex gap-1">
-                      <Button
-                        variant={player.role === "player" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleUpdatePlayer(index, { role: "player" })}
-                        className="h-6 text-xs gap-1 px-2"
-                      >
-                        <Sword className="h-3 w-3" />
-                        Player
-                      </Button>
-                      <Button
-                        variant={player.role === "dm" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleUpdatePlayer(index, { role: "dm" })}
-                        className="h-6 text-xs gap-1 px-2"
-                      >
-                        <Crown className="h-3 w-3" />
-                        DM
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Delete button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleRemovePlayer(index)}
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              {/* Inputs - inline with placeholders as labels */}
+              <div className="flex-1 flex items-center gap-2 min-w-0">
+                <Input
+                  value={player.playerName}
+                  onChange={(e) =>
+                    handleUpdatePlayer(index, { playerName: e.target.value })
+                  }
+                  placeholder="Player name"
+                  className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
+                />
+                <span className="text-muted-foreground/30 shrink-0">→</span>
+                <Input
+                  value={player.characterName ?? ""}
+                  onChange={(e) =>
+                    handleUpdatePlayer(index, {
+                      characterName: e.target.value || null,
+                    })
+                  }
+                  placeholder={player.role === "dm" ? "Display name" : "Character"}
+                  className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
+                />
               </div>
+
+              {/* Delete - appears on hover */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemovePlayer(index)}
+                className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
           ))}
         </div>
