@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* "Quiet Evening Study" Color Palette */
+  /* Deep indigo/purple base with silver accents */
+  --color-background: oklch(0.12 0.02 280);
+  --color-foreground: oklch(0.92 0.01 280);
+
+  /* Card: Slightly lighter indigo-gray */
+  --color-card: oklch(0.16 0.025 275);
+  --color-card-foreground: oklch(0.92 0.01 280);
+
+  /* Popover: Elevated surface */
+  --color-popover: oklch(0.20 0.03 270);
+  --color-popover-foreground: oklch(0.92 0.01 280);
+
+  /* Primary: Silver/white glow for interactive elements */
+  --color-primary: oklch(0.85 0.02 275);
+  --color-primary-foreground: oklch(0.12 0.02 280);
+
+  /* Secondary: Muted indigo-gray */
+  --color-secondary: oklch(0.24 0.03 275);
+  --color-secondary-foreground: oklch(0.85 0.01 280);
+
+  /* Muted: Silver-gray */
+  --color-muted: oklch(0.20 0.025 275);
+  --color-muted-foreground: oklch(0.65 0.02 275);
+
+  /* Accent: Soft purple glow */
+  --color-accent: oklch(0.55 0.12 285);
+  --color-accent-foreground: oklch(0.95 0.01 280);
+
+  /* Destructive: Muted rose */
+  --color-destructive: oklch(0.55 0.12 15);
+  --color-destructive-foreground: oklch(0.95 0.01 280);
+
+  /* Borders: Subtle, low-contrast */
+  --color-border: oklch(0.28 0.025 275);
+  --color-input: oklch(0.18 0.02 278);
+  --color-ring: oklch(0.75 0.03 280);
+
+  /* Success: Muted teal */
+  --color-success: oklch(0.55 0.10 180);
+  --color-success-foreground: oklch(0.95 0.01 280);
+
+  /* Radius - slightly more rounded for softer feel */
+  --radius: 0.5rem;
+
+  /* Typography - Lexend throughout */
+  --font-display: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Display headings use Lexend with medium weight */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Scrollbar styling - subtle indigo */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.14 0.02 280);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    oklch(0.30 0.03 278) 0%,
+    oklch(0.25 0.025 280) 100%
+  );
+  border-radius: 5px;
+  border: 2px solid oklch(0.14 0.02 280);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    oklch(0.35 0.035 278) 0%,
+    oklch(0.30 0.03 280) 100%
+  );
+}
+
+/* Custom utilities */
+@layer utilities {
+  /* Surface card effect - layered depth */
+  .surface-card {
+    background: linear-gradient(
+      145deg,
+      oklch(0.17 0.028 275) 0%,
+      oklch(0.15 0.025 278) 50%,
+      oklch(0.16 0.027 273) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 oklch(0.25 0.02 275 / 0.2),
+      0 4px 12px oklch(0.08 0.02 280 / 0.4),
+      0 1px 3px oklch(0.08 0.02 280 / 0.2);
+  }
+
+  /* Soft glow effect for interactive elements */
+  .soft-glow {
+    box-shadow:
+      0 0 20px oklch(0.75 0.03 280 / 0.12),
+      0 0 40px oklch(0.75 0.03 280 / 0.08);
+  }
+
+  /* Inset effect for input fields */
+  .inset-field {
+    background: oklch(0.13 0.02 280);
+    box-shadow:
+      inset 0 2px 4px oklch(0.08 0.015 280 / 0.4),
+      inset 0 1px 2px oklch(0.05 0.01 280 / 0.2);
+  }
+
+  /* Text glow for headings - silver/white */
+  .text-glow {
+    text-shadow: 0 0 20px oklch(0.85 0.02 280 / 0.25);
+  }
+
+  /* Subtle hover lift */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 6px 16px oklch(0.08 0.02 280 / 0.4),
+      0 2px 4px oklch(0.08 0.02 280 / 0.2);
+  }
+
+  /* Focus glow for interactive elements */
+  .focus-glow {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .focus-glow:focus {
+    box-shadow:
+      0 0 0 2px oklch(0.12 0.02 280),
+      0 0 0 4px oklch(0.75 0.03 280 / 0.3);
+  }
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px oklch(0.75 0.03 280 / 0.12);
+  }
+  50% {
+    box-shadow: 0 0 30px oklch(0.75 0.03 280 / 0.2);
+  }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
