@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Scroll, Sparkles } from "lucide-react";
 import { ImportPanel } from "@/components/import/import-panel";
 import { SettingsDialog } from "@/components/config/settings-dialog";
@@ -7,6 +8,7 @@ import { useConfig } from "@/hooks/use-config";
 import { useSummarizer } from "@/hooks/use-summarizer";
 import { useZoom } from "@/hooks/use-zoom";
 import { Button } from "@/components/ui/button";
+import type { PlayerConfig } from "@/types";
 
 export default function App() {
   const {
@@ -43,6 +45,44 @@ export default function App() {
 
   // Get all detected speakers from transcript
   const detectedSpeakers = transcript?.speakers ?? [];
+
+  // Auto-populate players from detected speakers (which are character names)
+  useEffect(() => {
+    if (!transcript || isLoading) return;
+
+    const validSpeakers = transcript.speakers.filter((s) => s.trim().length > 0);
+
+    // Check against both playerName and characterName to find existing entries
+    const existingNames = new Set(
+      config.players.flatMap((p) => [
+        p.playerName.toLowerCase(),
+        p.characterName?.toLowerCase(),
+      ].filter((n): n is string => n !== null && n !== undefined))
+    );
+
+    // Find speakers not already configured
+    const newSpeakers = validSpeakers.filter(
+      (speaker) => !existingNames.has(speaker.toLowerCase())
+    );
+
+    // Also fix any existing entries that have null characterName
+    const fixedPlayers = config.players.map((p) => ({
+      ...p,
+      characterName: p.characterName ?? p.playerName,
+    }));
+
+    const hasFixedPlayers = config.players.some((p) => p.characterName === null);
+
+    if (newSpeakers.length > 0 || hasFixedPlayers) {
+      const newPlayers: PlayerConfig[] = newSpeakers.map((speaker) => ({
+        playerName: speaker,
+        characterName: speaker,
+        role: "player" as const,
+      }));
+
+      updateAll({ players: [...fixedPlayers, ...newPlayers] });
+    }
+  }, [transcript, isLoading]); // Only run when transcript changes, not on every config update
 
   const canGenerate = transcript && hasApiKey && !isGenerating;
 

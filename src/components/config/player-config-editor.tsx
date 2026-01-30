@@ -22,14 +22,11 @@ export function PlayerConfigEditor({
   const [newRole, setNewRole] = useState<"player" | "dm">("player");
 
   const handleAddPlayer = () => {
-    if (!newPlayerName.trim()) return;
+    if (!newCharacterName.trim()) return;
 
     const newPlayer: PlayerConfig = {
-      playerName: newPlayerName.trim(),
-      // DMs default to "Dungeon Master" as their character name if not specified
-      characterName: newRole === "dm"
-        ? (newCharacterName.trim() || "Dungeon Master")
-        : (newCharacterName.trim() || null),
+      playerName: newPlayerName.trim() || newCharacterName.trim(),
+      characterName: newRole === "dm" ? "Dungeon Master" : newCharacterName.trim(),
       role: newRole,
     };
 
@@ -39,87 +36,128 @@ export function PlayerConfigEditor({
     setNewRole("player");
   };
 
-  const handleRemovePlayer = (playerName: string) => {
-    onPlayersChange(players.filter((p) => p.playerName !== playerName));
+  const handleRemovePlayer = (index: number) => {
+    onPlayersChange(players.filter((_, i) => i !== index));
   };
 
-  const handleUpdatePlayer = (
-    playerName: string,
-    updates: Partial<PlayerConfig>
-  ) => {
+  const handleUpdatePlayer = (index: number, updates: Partial<PlayerConfig>) => {
     onPlayersChange(
-      players.map((p) =>
-        p.playerName === playerName ? { ...p, ...updates } : p
-      )
+      players.map((p, i) => (i === index ? { ...p, ...updates } : p))
     );
   };
 
-  // Find speakers that aren't yet configured
+  // Find speakers that aren't yet configured (check both playerName and characterName)
   const unmappedSpeakers = detectedSpeakers.filter(
     (speaker) =>
+      speaker.trim().length > 0 &&
       !players.some(
-        (p) => p.playerName.toLowerCase() === speaker.toLowerCase()
+        (p) =>
+          p.playerName.toLowerCase() === speaker.toLowerCase() ||
+          p.characterName?.toLowerCase() === speaker.toLowerCase()
       )
   );
 
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Map player names from transcripts to their character names.
+        Characters are auto-detected from transcripts. Set the DM and optionally add real player names.
       </p>
 
       {/* Existing players */}
       {players.length > 0 && (
-        <div className="space-y-2">
-          {players.map((player) => (
+        <div className="space-y-3">
+          {players.map((player, index) => (
             <div
-              key={player.playerName}
+              key={index}
               className={cn(
-                "flex items-center gap-3 rounded-lg border p-3 transition-colors",
+                "rounded-lg border p-4 transition-colors",
                 player.role === "dm"
                   ? "bg-accent/5 border-accent/25"
                   : "bg-card/50 border-border/40"
               )}
             >
-              <div className={cn(
-                "flex items-center justify-center w-8 h-8 rounded-lg",
-                player.role === "dm" ? "bg-accent/10" : "bg-secondary/40"
-              )}>
-                {player.role === "dm" ? (
-                  <Crown className="h-4 w-4 text-accent" />
-                ) : (
-                  <Sword className="h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-              <div className="flex-1 grid grid-cols-2 gap-3">
-                <div>
-                  <span className="text-sm font-medium">{player.playerName}</span>
-                  <span className="text-xs text-muted-foreground ml-2">
-                    {player.role === "dm" ? "(Dungeon Master)" : "(Player)"}
-                  </span>
+              <div className="flex items-start gap-3">
+                {/* Role indicator */}
+                <div className={cn(
+                  "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-1",
+                  player.role === "dm" ? "bg-accent/10" : "bg-secondary/40"
+                )}>
+                  {player.role === "dm" ? (
+                    <Crown className="h-4 w-4 text-accent" />
+                  ) : (
+                    <Sword className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
-                <Input
-                  placeholder={player.role === "dm" ? "Dungeon Master" : "Character name"}
-                  value={player.characterName ?? ""}
-                  onChange={(e) =>
-                    handleUpdatePlayer(player.playerName, {
-                      // For DMs, empty input defaults to "Dungeon Master"
-                      characterName: player.role === "dm"
-                        ? (e.target.value || "Dungeon Master")
-                        : (e.target.value || null),
-                    })
-                  }
-                  className="h-8 inset-field text-sm"
-                />
+
+                {/* Editable fields */}
+                <div className="flex-1 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">
+                        Player Name
+                      </Label>
+                      <Input
+                        value={player.playerName}
+                        onChange={(e) =>
+                          handleUpdatePlayer(index, { playerName: e.target.value })
+                        }
+                        placeholder="Real name"
+                        className="h-8 inset-field text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">
+                        {player.role === "dm" ? "Display Name" : "Character Name"}
+                      </Label>
+                      <Input
+                        value={player.characterName ?? ""}
+                        onChange={(e) =>
+                          handleUpdatePlayer(index, {
+                            characterName: e.target.value || null,
+                          })
+                        }
+                        placeholder={player.role === "dm" ? "Dungeon Master" : "Character name"}
+                        className="h-8 inset-field text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Role toggle */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Role:</span>
+                    <div className="flex gap-1">
+                      <Button
+                        variant={player.role === "player" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdatePlayer(index, { role: "player" })}
+                        className="h-6 text-xs gap-1 px-2"
+                      >
+                        <Sword className="h-3 w-3" />
+                        Player
+                      </Button>
+                      <Button
+                        variant={player.role === "dm" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleUpdatePlayer(index, { role: "dm" })}
+                        className="h-6 text-xs gap-1 px-2"
+                      >
+                        <Crown className="h-3 w-3" />
+                        DM
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delete button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemovePlayer(index)}
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemovePlayer(player.playerName)}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           ))}
         </div>
@@ -129,7 +167,7 @@ export function PlayerConfigEditor({
       {unmappedSpeakers.length > 0 && (
         <div className="space-y-2 p-3 rounded-lg bg-secondary/30 border border-border/30">
           <Label className="text-xs text-muted-foreground">
-            Detected speakers not yet mapped:
+            Characters not yet added:
           </Label>
           <div className="flex flex-wrap gap-2">
             {unmappedSpeakers.map((speaker) => (
@@ -137,7 +175,10 @@ export function PlayerConfigEditor({
                 key={speaker}
                 variant="outline"
                 size="sm"
-                onClick={() => setNewPlayerName(speaker)}
+                onClick={() => {
+                  setNewCharacterName(speaker);
+                  setNewPlayerName("");
+                }}
                 className="h-7 text-xs"
               >
                 <Plus className="h-3 w-3 mr-1" />
@@ -152,22 +193,24 @@ export function PlayerConfigEditor({
       <div className="space-y-3 p-4 rounded-lg border border-border/40 bg-card/30">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-muted-foreground">Player Name</Label>
+            <Label className="text-xs text-muted-foreground">
+              {newRole === "dm" ? "Name (from transcript)" : "Character Name (from transcript)"}
+            </Label>
             <Input
-              placeholder="Real name (from transcript)"
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder={newRole === "dm" ? "DM's name as it appears" : "Character name"}
+              value={newCharacterName}
+              onChange={(e) => setNewCharacterName(e.target.value)}
               className="h-9 inset-field"
             />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">
-              {newRole === "dm" ? "Display Name" : "Character Name"}
+              Player Name (optional)
             </Label>
             <Input
-              placeholder={newRole === "dm" ? "Dungeon Master" : "Character name"}
-              value={newCharacterName}
-              onChange={(e) => setNewCharacterName(e.target.value)}
+              placeholder="Real name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
               className="h-9 inset-field"
             />
           </div>
@@ -196,7 +239,7 @@ export function PlayerConfigEditor({
           <Button
             size="sm"
             onClick={handleAddPlayer}
-            disabled={!newPlayerName.trim()}
+            disabled={!newCharacterName.trim()}
             className="h-8 gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
