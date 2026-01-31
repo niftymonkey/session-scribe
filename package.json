@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "validate": "pnpm typecheck && pnpm lint && pnpm test:run"
+    "validate": "pnpm typecheck && pnpm lint && pnpm test:run",
+    "version:bump": "node scripts/bump-version.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.23",
