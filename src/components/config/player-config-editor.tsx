@@ -103,25 +103,39 @@ export function PlayerConfigEditor({
               </button>
 
               {/* Inputs - inline with placeholders as labels */}
-              <div className="flex-1 flex items-center gap-2 min-w-0">
+              <div className="flex-1 space-y-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={player.playerName}
+                    onChange={(e) =>
+                      handleUpdatePlayer(index, { playerName: e.target.value })
+                    }
+                    placeholder="Player name"
+                    className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
+                  />
+                  <span className="text-muted-foreground/30 shrink-0">→</span>
+                  <Input
+                    value={player.characterName ?? ""}
+                    onChange={(e) =>
+                      handleUpdatePlayer(index, {
+                        characterName: e.target.value || null,
+                      })
+                    }
+                    placeholder={player.role === "dm" ? "Display name" : "Character"}
+                    className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
+                  />
+                </div>
                 <Input
-                  value={player.playerName}
-                  onChange={(e) =>
-                    handleUpdatePlayer(index, { playerName: e.target.value })
-                  }
-                  placeholder="Player name"
-                  className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
-                />
-                <span className="text-muted-foreground/30 shrink-0">→</span>
-                <Input
-                  value={player.characterName ?? ""}
-                  onChange={(e) =>
-                    handleUpdatePlayer(index, {
-                      characterName: e.target.value || null,
-                    })
-                  }
-                  placeholder={player.role === "dm" ? "Display name" : "Character"}
-                  className="h-7 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
+                  value={player.aliases?.join(", ") ?? ""}
+                  onChange={(e) => {
+                    const aliases = e.target.value
+                      .split(",")
+                      .map((a) => a.trim())
+                      .filter((a) => a.length > 0);
+                    handleUpdatePlayer(index, { aliases: aliases.length > 0 ? aliases : undefined });
+                  }}
+                  placeholder="Aliases (comma-separated, e.g., Mike, Mikael)"
+                  className="h-6 bg-transparent border-0 border-b border-border/20 rounded-none px-1 text-xs text-muted-foreground focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/40"
                 />
               </div>
 

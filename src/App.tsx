@@ -34,6 +34,7 @@ export default function App() {
   const {
     state: summarizerState,
     recap,
+    detectedNPCs,
     progress,
     error: summarizerError,
     generate,
@@ -97,6 +98,7 @@ export default function App() {
       config.openaiApiKey,
       transcript,
       config.players,
+      config.npcs,
       config.campaign.name || undefined,
       bookAct,
       config.selectedModel
@@ -130,6 +132,7 @@ export default function App() {
               config={config}
               onSave={updateAll}
               detectedSpeakers={detectedSpeakers}
+              detectedNPCs={detectedNPCs}
             />
           </div>
         </div>

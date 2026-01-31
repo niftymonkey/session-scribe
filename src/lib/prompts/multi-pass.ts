@@ -60,9 +60,13 @@ ${playerContext}
 ## Full Transcript
 ${transcriptText}
 
-## Instructions - Scene Discovery (Pass 1 of 3)
+## Instructions - Scene Discovery & NPC Detection (Pass 1 of 3)
 
-Your task is to identify the DISTINCT SCENES in this D&D session transcript.
+Your task is to:
+1. Identify the DISTINCT SCENES in this D&D session transcript
+2. Identify all NPCs (non-player characters) mentioned, including name variations from transcription errors
+
+### Scene Discovery
 
 A new scene begins when:
 - The party moves to a new location (e.g., leaving a tavern, entering a dungeon)
@@ -76,11 +80,25 @@ For EACH scene, provide:
 - **location**: The primary location of the scene
 - **characters**: Which player characters are present/active in this scene
 
-IMPORTANT:
+Scene requirements:
 - Scenes should be contiguous (no gaps between end of one and start of next)
 - First scene should start at 0 or the first entry's timestamp
 - Last scene should end at the final entry's timestamp
-- Aim for 3-8 scenes for a typical session - don't over-segment`;
+- Aim for 3-8 scenes for a typical session - don't over-segment
+
+### NPC Detection
+
+Identify all NPCs (non-player characters) mentioned in the transcript. These are characters that are NOT in the Players list above.
+
+For EACH NPC, provide:
+- **canonicalName**: The correct/full name (e.g., "Princess Priyanella", "Duchess Hadama")
+- **variations**: Other spellings or references to this same NPC that appear in the transcript due to transcription errors or informal references (e.g., ["Priyanella", "Preanella", "Pritenella", "the Princess"])
+
+IMPORTANT for NPCs:
+- Audio transcription often mishears names - group similar-sounding variations together
+- Include both formal names and informal references (titles, nicknames)
+- Do NOT include player characters listed above
+- Do NOT include generic terms like "the guard" or "a merchant" unless they have a specific name`;
 }
 
 /**

@@ -8,6 +8,7 @@ import type {
   RecapGenerationProgress,
   DiscoveredScene,
   SceneDetails,
+  DetectedNPC,
 } from "@/types";
 import { getSystemPromptWithContext } from "../prompts/system-prompt";
 import { buildPass1Prompt, buildPass2Prompt, buildPass3Prompt } from "../prompts/multi-pass";
@@ -31,8 +32,13 @@ function extractSceneEntries(
   );
 }
 
+interface Pass1Output {
+  scenes: DiscoveredScene[];
+  npcs: DetectedNPC[];
+}
+
 /**
- * Pass 1: Discover scene boundaries
+ * Pass 1: Discover scene boundaries and detect NPCs
  */
 async function runPass1(
   model: ReturnType<ReturnType<typeof createOpenAI>>,
@@ -41,11 +47,11 @@ async function runPass1(
   sessionTitle: string,
   playerMap: PlayerConfig[],
   onProgress?: (progress: RecapGenerationProgress) => void
-): Promise<DiscoveredScene[]> {
+): Promise<Pass1Output> {
   onProgress?.({
     stage: "summarizing",
     passName: "discovery",
-    message: "Pass 1: Discovering scene boundaries...",
+    message: "Pass 1: Discovering scenes and NPCs...",
   });
 
   const prompt = buildPass1Prompt(entries, sessionTitle, playerMap);
@@ -57,7 +63,10 @@ async function runPass1(
     schema: Pass1Schema,
   });
 
-  return result.scenes;
+  return {
+    scenes: result.scenes,
+    npcs: result.npcs,
+  };
 }
 
 /**
@@ -224,9 +233,14 @@ async function runPass3(
   };
 }
 
+export interface RecapGenerationResult {
+  recap: SessionRecap;
+  detectedNPCs: DetectedNPC[];
+}
+
 /**
  * Generate a session recap using multi-pass processing:
- * - Pass 1: Scene Discovery
+ * - Pass 1: Scene Discovery + NPC Detection
  * - Pass 2: Detail Extraction (parallel per scene)
  * - Pass 3: Synthesis
  */
@@ -238,7 +252,7 @@ export async function generateRecapMultiPass(
   bookAct?: string,
   modelId?: string,
   onProgress?: (progress: RecapGenerationProgress) => void
-): Promise<SessionRecap> {
+): Promise<RecapGenerationResult> {
   const openai = createOpenAI({ apiKey });
   const model = openai(modelId ?? getDefaultModelId());
   const systemPrompt = getSystemPromptWithContext(campaignName, bookAct);
@@ -248,8 +262,8 @@ export async function generateRecapMultiPass(
     message: `Starting multi-pass generation with ${transcript.entries.length} entries...`,
   });
 
-  // Pass 1: Discover scenes
-  const scenes = await runPass1(
+  // Pass 1: Discover scenes and detect NPCs
+  const { scenes, npcs } = await runPass1(
     model,
     systemPrompt,
     transcript.entries,
@@ -291,5 +305,8 @@ export async function generateRecapMultiPass(
     message: "Recap generated successfully!",
   });
 
-  return recap;
+  return {
+    recap,
+    detectedNPCs: npcs,
+  };
 }

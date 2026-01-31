@@ -6,6 +6,11 @@ export interface DiscoveredScene {
   characters: string[];
 }
 
+export interface DetectedNPC {
+  canonicalName: string;
+  variations: string[];
+}
+
 export interface SceneDetails {
   sceneName: string;
   charactersPresent: string[];
@@ -26,6 +31,7 @@ export interface SceneDetails {
 
 export interface Pass1Result {
   scenes: DiscoveredScene[];
+  npcs: DetectedNPC[];
 }
 
 export interface Pass2Result {

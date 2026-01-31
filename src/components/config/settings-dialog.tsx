@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings, Eye, EyeOff, Key, Map, Users, Cpu, Sparkles } from "lucide-react";
+import { Settings, Eye, EyeOff, Key, Map, Users, Cpu, Sparkles, UserCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlayerConfigEditor } from "./player-config-editor";
+import { NPCConfigEditor } from "./npc-config-editor";
 import { ModelSelector } from "./model-selector";
-import type { AppConfig, CampaignInfo, PlayerConfig } from "@/types";
+import type { AppConfig, CampaignInfo, PlayerConfig, NPCConfig, DetectedNPC } from "@/types";
 
 interface SettingsDialogProps {
   config: AppConfig;
@@ -23,15 +24,18 @@ interface SettingsDialogProps {
     apiKey?: string;
     campaign?: Partial<CampaignInfo>;
     players?: PlayerConfig[];
+    npcs?: NPCConfig[];
     selectedModel?: string;
   }) => Promise<void>;
   detectedSpeakers?: string[];
+  detectedNPCs?: DetectedNPC[];
 }
 
 export function SettingsDialog({
   config,
   onSave,
   detectedSpeakers,
+  detectedNPCs,
 }: SettingsDialogProps) {
   const [open, setOpen] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
@@ -44,6 +48,7 @@ export function SettingsDialog({
     config.campaign.currentAct?.toString() ?? ""
   );
   const [players, setPlayers] = useState(config.players);
+  const [npcs, setNpcs] = useState(config.npcs);
   const [selectedModel, setSelectedModel] = useState(config.selectedModel);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -55,6 +60,7 @@ export function SettingsDialog({
       setCurrentBook(config.campaign.currentBook?.toString() ?? "");
       setCurrentAct(config.campaign.currentAct?.toString() ?? "");
       setPlayers(config.players);
+      setNpcs(config.npcs);
       setSelectedModel(config.selectedModel);
     }
   }, [open, config]);
@@ -70,6 +76,7 @@ export function SettingsDialog({
           currentAct: currentAct ? parseInt(currentAct) : undefined,
         },
         players,
+        npcs,
         selectedModel,
       });
       setOpen(false);
@@ -85,7 +92,7 @@ export function SettingsDialog({
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl h-[80vh] max-h-[800px] flex flex-col p-0 gap-0 surface-card border-border/50">
+      <DialogContent className="max-w-4xl w-[95vw] h-[80vh] max-h-[800px] flex flex-col p-0 gap-0 surface-card border-border/50">
         {/* Fixed Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/40 shrink-0">
           <DialogTitle className="text-xl" style={{ fontFamily: 'var(--font-display)' }}>
@@ -98,22 +105,29 @@ export function SettingsDialog({
 
         {/* Tabbed Content */}
         <Tabs defaultValue="campaign" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-6 mt-4 grid grid-cols-2 bg-secondary/30 shrink-0">
+          <TabsList className="mx-6 mt-4 grid grid-cols-4 bg-secondary/30 shrink-0">
             <TabsTrigger value="campaign" className="gap-2 data-[state=active]:bg-card">
               <Map className="h-3.5 w-3.5" />
-              Campaign & Party
+              Campaign
+            </TabsTrigger>
+            <TabsTrigger value="party" className="gap-2 data-[state=active]:bg-card">
+              <Users className="h-3.5 w-3.5" />
+              Party
+            </TabsTrigger>
+            <TabsTrigger value="npcs" className="gap-2 data-[state=active]:bg-card">
+              <UserCircle className="h-3.5 w-3.5" />
+              NPCs
             </TabsTrigger>
             <TabsTrigger value="ai" className="gap-2 data-[state=active]:bg-card">
               <Sparkles className="h-3.5 w-3.5" />
-              AI Settings
+              AI
             </TabsTrigger>
           </TabsList>
 
-          {/* Campaign & Party Tab */}
+          {/* Campaign Tab */}
           <TabsContent value="campaign" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
             <ScrollArea className="h-full">
               <div className="p-6 space-y-6">
-                {/* Campaign Details */}
                 <section className="space-y-4">
                   <h3 className="text-sm font-medium flex items-center gap-2" style={{ fontFamily: 'var(--font-display)' }}>
                     <Map className="h-4 w-4 text-accent" />
@@ -167,8 +181,14 @@ export function SettingsDialog({
                     </div>
                   </div>
                 </section>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-                {/* Adventuring Party */}
+          {/* Party Tab */}
+          <TabsContent value="party" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
+            <ScrollArea className="h-full">
+              <div className="p-6 space-y-6">
                 <section className="space-y-4">
                   <h3 className="text-sm font-medium flex items-center gap-2" style={{ fontFamily: 'var(--font-display)' }}>
                     <Users className="h-4 w-4 text-accent" />
@@ -179,6 +199,27 @@ export function SettingsDialog({
                       players={players}
                       onPlayersChange={setPlayers}
                       detectedSpeakers={detectedSpeakers}
+                    />
+                  </div>
+                </section>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* NPCs Tab */}
+          <TabsContent value="npcs" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
+            <ScrollArea className="h-full">
+              <div className="p-6 space-y-6">
+                <section className="space-y-4">
+                  <h3 className="text-sm font-medium flex items-center gap-2" style={{ fontFamily: 'var(--font-display)' }}>
+                    <UserCircle className="h-4 w-4 text-accent" />
+                    Non-Player Characters
+                  </h3>
+                  <div className="pl-6">
+                    <NPCConfigEditor
+                      npcs={npcs}
+                      onNpcsChange={setNpcs}
+                      detectedNPCs={detectedNPCs}
                     />
                   </div>
                 </section>

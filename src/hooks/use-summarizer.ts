@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { TranscriptData, PlayerConfig, SessionRecap, RecapGenerationProgress } from "@/types";
+import type { TranscriptData, PlayerConfig, NPCConfig, SessionRecap, RecapGenerationProgress, DetectedNPC } from "@/types";
 import { generateRecap } from "@/lib/ai";
 
 export type SummarizerState = "idle" | "generating" | "success" | "error";
@@ -7,6 +7,7 @@ export type SummarizerState = "idle" | "generating" | "success" | "error";
 export function useSummarizer() {
   const [state, setState] = useState<SummarizerState>("idle");
   const [recap, setRecap] = useState<SessionRecap | null>(null);
+  const [detectedNPCs, setDetectedNPCs] = useState<DetectedNPC[]>([]);
   const [progress, setProgress] = useState<RecapGenerationProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,6 +16,7 @@ export function useSummarizer() {
       apiKey: string,
       transcript: TranscriptData,
       playerMap: PlayerConfig[],
+      npcs: NPCConfig[],
       campaignName?: string,
       bookAct?: string,
       modelId?: string
@@ -23,18 +25,21 @@ export function useSummarizer() {
       setError(null);
       setProgress(null);
       setRecap(null);
+      setDetectedNPCs([]);
 
       try {
         const result = await generateRecap(
           apiKey,
           transcript,
           playerMap,
+          npcs,
           campaignName,
           bookAct,
           modelId,
           setProgress
         );
-        setRecap(result);
+        setRecap(result.recap);
+        setDetectedNPCs(result.detectedNPCs);
         setState("success");
       } catch (err) {
         console.error("Failed to generate recap:", err);
@@ -48,6 +53,7 @@ export function useSummarizer() {
   const reset = useCallback(() => {
     setState("idle");
     setRecap(null);
+    setDetectedNPCs([]);
     setProgress(null);
     setError(null);
   }, []);
@@ -55,6 +61,7 @@ export function useSummarizer() {
   return {
     state,
     recap,
+    detectedNPCs,
     progress,
     error,
     generate,

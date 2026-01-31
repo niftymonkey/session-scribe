@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { AppConfig, PlayerConfig, CampaignInfo } from "@/types";
+import type { AppConfig, PlayerConfig, NPCConfig, CampaignInfo } from "@/types";
 import { defaultConfig } from "@/types";
 import { loadConfig, saveConfig } from "@/lib/config/config-store";
 
@@ -53,6 +53,7 @@ export function useConfig() {
     apiKey?: string;
     campaign?: Partial<CampaignInfo>;
     players?: PlayerConfig[];
+    npcs?: NPCConfig[];
     selectedModel?: string;
   }) => {
     setConfig((prev) => {
@@ -61,6 +62,7 @@ export function useConfig() {
         openaiApiKey: updates.apiKey ?? prev.openaiApiKey,
         campaign: { ...prev.campaign, ...updates.campaign },
         players: updates.players ?? prev.players,
+        npcs: updates.npcs ?? prev.npcs,
         selectedModel: updates.selectedModel ?? prev.selectedModel,
       };
       saveConfig(updated);

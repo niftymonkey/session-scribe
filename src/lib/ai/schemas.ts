@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Pass 1: Scene Discovery
+// Pass 1: Scene Discovery + NPC Detection
 export const Pass1Schema = z.object({
   scenes: z.array(
     z.object({
@@ -9,6 +9,12 @@ export const Pass1Schema = z.object({
       endTimestampSeconds: z.number(),
       location: z.string(),
       characters: z.array(z.string()),
+    })
+  ),
+  npcs: z.array(
+    z.object({
+      canonicalName: z.string().describe("The correct/canonical name for this NPC"),
+      variations: z.array(z.string()).describe("Other names/spellings heard in the transcript for this same NPC"),
     })
   ),
 });
