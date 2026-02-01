@@ -106,4 +106,21 @@ Tom had a little sweet moment.`;
     expect(result.entries).toEqual([]);
     expect(result.speakers).toEqual([]);
   });
+
+  it("handles inline text format where text follows timestamp on same line", () => {
+    const inlineTranscript = `LOTW Session 35 (11-3-2025)
+November 3, 2025, 2:23AM
+2h 53m 49s
+
+Micco Fay   0:07All right, we find ourselves in session 35.
+Samuel Frost   1:30This is a response.`;
+
+    const result = parseTranscript(inlineTranscript);
+    expect(result.entries.length).toBe(2);
+    expect(result.entries[0].speaker).toBe("Micco Fay");
+    expect(result.entries[0].timestamp).toBe("0:07");
+    expect(result.entries[0].text).toBe("All right, we find ourselves in session 35.");
+    expect(result.entries[1].speaker).toBe("Samuel Frost");
+    expect(result.entries[1].text).toBe("This is a response.");
+  });
 });
