@@ -1,7 +1,39 @@
-# Tauri + React + Typescript
+# D&D Session Summarizer
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Turn your D&D session recordings into polished narrative recaps.
 
-## Recommended IDE Setup
+## What It Does
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Takes your session artifacts and generates a detailed recap:
+
+- **Input**: Microsoft Teams transcript + Roll20 dice log
+- **Output**: Scene-by-scene narrative with key events, dialogue, and character moments
+- **Export**: DOCX (styled) or Markdown
+
+The AI identifies story beats, extracts specific details (items, gold, NPCs), and writes it up without mechanical jargon.
+
+## Getting Started
+
+1. Download the latest release for your platform (Windows/macOS/Linux)
+2. Open Settings and enter your OpenRouter API key
+3. Add your players (real name → character name)
+    - or let the app detect them from your first transcript
+4. Optionally add known NPCs
+    - the app will also discover new ones during generation
+
+## Typical Workflow
+
+1. **Import** your Teams transcript (.txt file)
+2. **Import** your Roll20 dice log (optional but adds context)
+3. **Generate** - click the button and wait (longer sessions take a few minutes)
+4. **Review & Export** - regenerate if needed, or export to DOCX/Markdown for final edits
+
+## Tips
+
+- Make sure your transcript has clear speaker labels
+- The AI detects NPCs automatically - you can save them for future sessions
+- Generation uses multiple AI passes, so be patient with long sessions
+
+## Releases
+
+Download from [GitHub Releases](https://github.com/niftymonkey/dnd-session-summarizer/releases)
