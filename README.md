@@ -1,4 +1,4 @@
-# D&D Session Summarizer
+# Session Scribe
 
 Turn your D&D session recordings into polished narrative recaps.
 
@@ -10,12 +10,12 @@ Takes your session artifacts and generates a detailed recap:
 - **Output**: Scene-by-scene narrative with key events, dialogue, and character moments
 - **Export**: DOCX (styled) or Markdown
 
-The AI identifies story beats, extracts specific details (items, gold, NPCs), and writes it up without mechanical jargon.
+The AI identifies story beats, extracts details (items, gold, NPCs), and writes it up without mechanical jargon.
 
 ## Getting Started
 
 1. Download the latest release for your platform (Windows/macOS/Linux)
-2. Open Settings and enter your OpenRouter API key
+2. Open Settings and enter your [OpenAI API key](https://platform.openai.com/api-keys)
 3. Add your players (real name → character name)
     - or let the app detect them from your first transcript
 4. Optionally add known NPCs
@@ -36,4 +36,4 @@ The AI identifies story beats, extracts specific details (items, gold, NPCs), an
 
 ## Releases
 
-Download from [GitHub Releases](https://github.com/niftymonkey/dnd-session-summarizer/releases)
+Download from [GitHub Releases](https://github.com/niftymonkey/session-scribe/releases)

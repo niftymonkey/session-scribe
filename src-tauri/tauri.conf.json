@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "D&D Session Summarizer",
+  "productName": "Session Scribe",
   "version": "0.1.0",
-  "identifier": "com.niftymonkey.dnd-session-summarizer",
+  "identifier": "com.niftymonkey.session-scribe",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "D&D Session Summarizer",
+        "title": "Session Scribe",
         "width": 1200,
         "height": 800,
         "minWidth": 800,
