@@ -265,12 +265,13 @@ function findPlayerBySpeaker(
   speaker: string,
   playerMap: PlayerConfig[]
 ): PlayerConfig | undefined {
-  const speakerLower = speaker.toLowerCase();
+  const normalize = (value: string) => value.trim().toLowerCase();
+  const speakerNorm = normalize(speaker);
   return playerMap.find(
     (p) =>
-      p.playerName.toLowerCase() === speakerLower ||
-      p.characterName?.toLowerCase() === speakerLower ||
-      p.aliases?.some((a) => a.toLowerCase() === speakerLower)
+      normalize(p.playerName) === speakerNorm ||
+      (p.characterName && normalize(p.characterName) === speakerNorm) ||
+      p.aliases?.some((a) => normalize(a) === speakerNorm)
   );
 }
 
