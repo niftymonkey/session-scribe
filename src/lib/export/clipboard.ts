@@ -35,6 +35,70 @@ export function recapToMarkdown(recap: SessionRecap): string {
   }
   lines.push("");
 
+  // Characters Present
+  if (recap.metadata?.charactersPresent?.length > 0) {
+    lines.push("## Characters Present");
+    lines.push("");
+    for (const character of recap.metadata.charactersPresent) {
+      lines.push(`- ${character}`);
+    }
+    lines.push("");
+  }
+
+  // Opening Context
+  if (recap.openingContext) {
+    lines.push("## Opening Context");
+    lines.push("");
+    if (recap.openingContext.startingState) {
+      lines.push("### Starting State");
+      lines.push("");
+      lines.push(recap.openingContext.startingState);
+      lines.push("");
+    }
+    if (recap.openingContext.objectives?.length > 0) {
+      lines.push("### Session Objectives");
+      lines.push("");
+      for (const objective of recap.openingContext.objectives) {
+        lines.push(`- ${objective}`);
+      }
+      lines.push("");
+    }
+  }
+
+  // Session Events (Scene-by-scene breakdown)
+  if (recap.sceneHighlights?.length > 0) {
+    lines.push("## Session Events");
+    lines.push("");
+    for (const scene of recap.sceneHighlights) {
+      lines.push(`### ${scene.sceneName}`);
+      lines.push("");
+      // Scene metadata
+      const sceneMeta: string[] = [];
+      if (scene.timeOfDay) sceneMeta.push(`*${scene.timeOfDay}*`);
+      if (scene.charactersPresent.length > 0) {
+        sceneMeta.push(`Characters: ${scene.charactersPresent.join(", ")}`);
+      }
+      if (sceneMeta.length > 0) {
+        lines.push(sceneMeta.join(" | "));
+        lines.push("");
+      }
+      // Scene highlights
+      if (scene.highlights.length > 0) {
+        lines.push("**Key Moments:**");
+        lines.push("");
+        for (const highlight of scene.highlights) {
+          lines.push(`- ${highlight.text}`);
+          if (highlight.subBullets && highlight.subBullets.length > 0) {
+            for (const sub of highlight.subBullets) {
+              lines.push(`  - ${sub}`);
+            }
+          }
+        }
+        lines.push("");
+      }
+    }
+  }
+
   // Highlights
   lines.push("## Key Highlights");
   lines.push("");
