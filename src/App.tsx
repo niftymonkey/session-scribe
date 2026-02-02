@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Scroll, ArrowRight } from "lucide-react";
 import { ImportPanel } from "@/components/import/import-panel";
 import { SettingsDialog } from "@/components/config/settings-dialog";
@@ -221,35 +221,27 @@ export default function App() {
     }
   }, [summarizerState, generationStartTime]);
 
-  // Handle pending regeneration after state resets
-  useEffect(() => {
-    if (pendingRegenerate.current && summarizerState === "idle") {
-      pendingRegenerate.current = false;
-      handleGenerate();
-    }
-  }, [summarizerState]);
-
-  const toggleExpand = (phase: Phase) => {
+  const toggleExpand = useCallback((phase: Phase) => {
     setPhaseState((prev) => ({
       ...prev,
       expanded: prev.expanded.includes(phase)
         ? prev.expanded.filter((p) => p !== phase)
         : [...prev.expanded, phase],
     }));
-  };
+  }, []);
 
   // Handle explicit continue from import phase
-  const handleContinueFromImport = () => {
+  const handleContinueFromImport = useCallback(() => {
     setHasConfirmedImport(true);
-  };
+  }, []);
 
   // Reset confirmation when transcript is cleared
-  const handleClearTranscript = () => {
+  const handleClearTranscript = useCallback(() => {
     clearTranscript();
     setHasConfirmedImport(false);
-  };
+  }, [clearTranscript]);
 
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     if (!transcript || !config.openaiApiKey) return;
 
     const bookAct =
@@ -266,23 +258,37 @@ export default function App() {
       bookAct,
       config.selectedModel
     );
-  };
+  }, [transcript, config.openaiApiKey, config.campaign, config.players, config.npcs, config.selectedModel, generate]);
 
-  const handleRegenerate = () => {
+  const handleRegenerate = useCallback(() => {
     pendingRegenerate.current = true;
     resetSummarizer();
-  };
+  }, [resetSummarizer]);
 
-  const handlePlayersChange = (players: PlayerConfig[]) => {
-    updateAll({ players });
-  };
+  // Handle pending regeneration after state resets
+  useEffect(() => {
+    if (pendingRegenerate.current && summarizerState === "idle") {
+      pendingRegenerate.current = false;
+      handleGenerate();
+    }
+  }, [summarizerState, handleGenerate]);
 
-  const handleSaveNpc = (npc: NPCConfig) => {
-    updateAll({ npcs: [...config.npcs, npc] });
-  };
+  const handlePlayersChange = useCallback(
+    (players: PlayerConfig[]) => {
+      updateAll({ players });
+    },
+    [updateAll]
+  );
 
-  // Build phase summaries
-  const getImportSummary = (): ImportPhaseSummary | null => {
+  const handleSaveNpc = useCallback(
+    (npc: NPCConfig) => {
+      updateAll({ npcs: [...config.npcs, npc] });
+    },
+    [updateAll, config.npcs]
+  );
+
+  // Build phase summaries (memoized to prevent unnecessary re-renders)
+  const importSummary = useMemo((): ImportPhaseSummary | null => {
     if (!transcript) return null;
     const meta = transcript.metadata;
     const formatDuration = (seconds: number) => {
@@ -306,9 +312,9 @@ export default function App() {
       hasDiceLog: !!diceLog,
       diceLogRollCount: diceLog?.rollCount,
     };
-  };
+  }, [transcript, diceLog]);
 
-  const getParseReviewSummary = (): ParseReviewSummary | null => {
+  const parseReviewSummary = useMemo((): ParseReviewSummary | null => {
     if (!transcript) return null;
     const players = config.players;
     const dmCount = players.filter((p) => p.role === "dm").length;
@@ -318,9 +324,9 @@ export default function App() {
       dmCount,
       savedNpcCount: config.npcs.length,
     };
-  };
+  }, [transcript, config.players, config.npcs.length]);
 
-  const getGenerateSummary = (): GeneratePhaseSummary | null => {
+  const generateSummary = useMemo((): GeneratePhaseSummary | null => {
     if (!recap || !generationElapsedTime) return null;
     return {
       elapsedTime: generationElapsedTime,
@@ -331,11 +337,7 @@ export default function App() {
         0,
       quoteCount: recap.quotes?.length ?? 0,
     };
-  };
-
-  const importSummary = getImportSummary();
-  const parseReviewSummary = getParseReviewSummary();
-  const generateSummary = getGenerateSummary();
+  }, [recap, generationElapsedTime]);
 
   return (
     <div className="min-h-screen flex flex-col">
