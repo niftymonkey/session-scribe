@@ -78,6 +78,9 @@ export default function App() {
   // Ref for scroll behavior
   const shouldScrollToPhase = useRef<Phase | null>(null);
 
+  // Ref for pending regeneration (avoids race condition with setTimeout)
+  const pendingRegenerate = useRef(false);
+
   // Get all detected speakers from transcript
   const detectedSpeakers = transcript?.speakers ?? [];
 
@@ -218,6 +221,14 @@ export default function App() {
     }
   }, [summarizerState, generationStartTime]);
 
+  // Handle pending regeneration after state resets
+  useEffect(() => {
+    if (pendingRegenerate.current && summarizerState === "idle") {
+      pendingRegenerate.current = false;
+      handleGenerate();
+    }
+  }, [summarizerState]);
+
   const toggleExpand = (phase: Phase) => {
     setPhaseState((prev) => ({
       ...prev,
@@ -258,9 +269,8 @@ export default function App() {
   };
 
   const handleRegenerate = () => {
+    pendingRegenerate.current = true;
     resetSummarizer();
-    // Small delay to let state reset, then regenerate
-    setTimeout(handleGenerate, 100);
   };
 
   const handlePlayersChange = (players: PlayerConfig[]) => {
@@ -303,21 +313,10 @@ export default function App() {
     const players = config.players;
     const dmCount = players.filter((p) => p.role === "dm").length;
     const playerCount = players.length - dmCount;
-    // Count how many players match saved config (for returning users)
-    const matchedCount = players.filter((p) =>
-      config.players.some(
-        (saved) =>
-          saved.playerName.toLowerCase() === p.playerName.toLowerCase() ||
-          saved.aliases?.some(
-            (a) => a.toLowerCase() === p.playerName.toLowerCase()
-          )
-      )
-    ).length;
     return {
       playerCount,
       dmCount,
       savedNpcCount: config.npcs.length,
-      matchedCount: matchedCount > 0 ? matchedCount : 0,
     };
   };
 

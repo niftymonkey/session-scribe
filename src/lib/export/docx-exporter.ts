@@ -277,8 +277,8 @@ export async function exportRecapToDocx(recap: SessionRecap, filename?: string):
   const buffer = await blob.arrayBuffer();
 
   // Get save path from user
-  const defaultName = filename
-    ? `${filename.replace(/[^a-zA-Z0-9\s-]/g, "_")}.docx`
+  const defaultName = filename?.trim()
+    ? `${filename.trim().replace(/[^a-zA-Z0-9\s-]/g, "_")}.docx`
     : `${recap.header.sessionTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Recap.docx`;
   const filePath = await save({
     defaultPath: defaultName,

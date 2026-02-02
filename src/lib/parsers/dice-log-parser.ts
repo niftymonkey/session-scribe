@@ -102,6 +102,9 @@ function isPlayerHeader(line: string): boolean {
   // Must have some content before the colon (not just ":")
   const content = line.slice(0, -1).trim();
   if (!content) return false;
+  // Exclude known labels that aren't player headers
+  const knownLabels = ["Details", "Damage"];
+  if (knownLabels.includes(content)) return false;
   // Skip GM lines (handled separately)
   if (line.startsWith("Storyteller (GM):")) return true;
   // Skip chat messages like "Gorgrin Snowstep:afk for a few"

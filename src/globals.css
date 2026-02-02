@@ -231,31 +231,6 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 1;
 }
 
-/* Phase expand/collapse animations */
-@keyframes phase-expand {
-  from {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    max-height: 5000px;
-    transform: translateY(0);
-  }
-}
-
-@keyframes phase-collapse {
-  from {
-    opacity: 1;
-    max-height: 5000px;
-  }
-  to {
-    opacity: 0;
-    max-height: 0;
-  }
-}
-
 /* Scrollbar for thin containers */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;

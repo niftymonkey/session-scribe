@@ -32,7 +32,6 @@ export interface ParseReviewSummary {
   playerCount: number;
   dmCount: number;
   savedNpcCount: number;
-  matchedCount: number;
 }
 
 export interface GeneratePhaseSummary {
@@ -40,14 +39,6 @@ export interface GeneratePhaseSummary {
   sceneCount: number;
   highlightCount: number;
   quoteCount: number;
-}
-
-export interface PhaseTransitions {
-  canAdvanceTo: (phase: Phase) => boolean;
-  advance: (phase: Phase) => void;
-  expand: (phase: Phase) => void;
-  collapse: (phase: Phase) => void;
-  toggleExpand: (phase: Phase) => void;
 }
 
 /**
@@ -60,7 +51,7 @@ export function getPhaseTitle(phase: Phase): string {
     case "parse-review":
       return "Review & Configure";
     case "generate":
-      return "Generate Chronicle";
+      return "Generate";
     case "output":
       return "Session Recap";
   }

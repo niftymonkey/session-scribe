@@ -1,4 +1,4 @@
-import { FileText, Users, Sparkles, Clock, Dices, Link2, UserCheck } from "lucide-react";
+import { FileText, Users, Sparkles, Clock, Dices, UserCheck } from "lucide-react";
 import type { ImportPhaseSummary, ParseReviewSummary, GeneratePhaseSummary } from "@/types";
 
 interface ImportSummaryProps {
@@ -28,7 +28,7 @@ export function ImportPhaseSummaryDisplay({ data }: ImportSummaryProps) {
       {data.hasDiceLog && (
         <div className="flex items-center gap-1.5 text-muted-foreground/60">
           <Dices className="w-3.5 h-3.5" />
-          <span>+ Dice log ({data.diceLogRollCount} rolls)</span>
+          <span>+ Dice log{data.diceLogRollCount != null && ` (${data.diceLogRollCount} rolls)`}</span>
         </div>
       )}
     </div>
@@ -55,12 +55,6 @@ export function ParseReviewSummaryDisplay({ data }: ParseReviewSummaryProps) {
           <span>{data.savedNpcCount} saved NPC{data.savedNpcCount !== 1 ? "s" : ""}</span>
         </div>
       )}
-      {data.matchedCount > 0 && (
-        <div className="flex items-center gap-1.5 text-success/70">
-          <Link2 className="w-3.5 h-3.5" />
-          <span>{data.matchedCount} matched</span>
-        </div>
-      )}
     </div>
   );
 }
@@ -79,8 +73,8 @@ export function GeneratePhaseSummaryDisplay({ data }: GenerateSummaryProps) {
       <div className="flex items-center gap-1.5 text-muted-foreground/60">
         <Sparkles className="w-3.5 h-3.5" />
         <span>
-          {data.sceneCount} scene{data.sceneCount !== 1 ? "s" : ""}, {" "}
-          {data.highlightCount} highlight{data.highlightCount !== 1 ? "s" : ""}, {" "}
+          {data.sceneCount} scene{data.sceneCount !== 1 ? "s" : ""},{" "}
+          {data.highlightCount} highlight{data.highlightCount !== 1 ? "s" : ""},{" "}
           {data.quoteCount} quote{data.quoteCount !== 1 ? "s" : ""}
         </span>
       </div>

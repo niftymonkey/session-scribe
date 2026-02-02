@@ -138,8 +138,13 @@ async function runPass2(
         const startTime = performance.now();
         const result = await extractSceneDetails(model, systemPrompt, entries, scene, playerMap);
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-        completedCount++;
 
+        // For empty scenes, yield to event loop so progress messages aren't lost
+        if (isEmpty) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
+        completedCount++;
         const timing = isEmpty ? "skipped - no entries" : `${elapsed}s`;
         onProgress?.({
           stage: "summarizing",
@@ -181,8 +186,13 @@ async function runPass2(
         const startTime = performance.now();
         const result = await extractSceneDetails(model, systemPrompt, entries, scene, playerMap);
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-        completedCount++;
 
+        // For empty scenes, yield to event loop so progress messages aren't lost
+        if (isEmpty) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
+        completedCount++;
         const timing = isEmpty ? "skipped - no entries" : `${elapsed}s`;
         onProgress?.({
           stage: "summarizing",
