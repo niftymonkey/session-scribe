@@ -60,7 +60,9 @@ function parseSpeakerLine(line: string): { speaker: string; timestamp: string; i
   }
 
   // Second try: timestamp followed by text on same line (DOCX format variant)
-  const inlineMatch = line.match(/^(.+?)\s{2,}(\d+:\d+(?::\d+)?)([A-Z].*)$/);
+  // Use constrained timestamp pattern (M:SS or H:MM:SS with 2-digit seconds) to avoid
+  // greedy matching into the text (e.g., "0:101st" should parse as timestamp "0:10")
+  const inlineMatch = line.match(/^(.+?)\s{2,}(\d{1,2}:\d{2}(?::\d{2})?)(.+)$/);
   if (inlineMatch) {
     return {
       speaker: inlineMatch[1].trim(),

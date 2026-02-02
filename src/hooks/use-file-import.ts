@@ -55,7 +55,9 @@ export function useFileImport(): UseFileImportResult {
       let content: string;
       if (isDocx) {
         const bytes = await readFile(path);
-        content = await extractTextFromDocx(bytes.buffer);
+        content = await extractTextFromDocx(
+          bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+        );
       } else {
         content = await readTextFile(path);
       }

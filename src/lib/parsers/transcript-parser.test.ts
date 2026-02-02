@@ -123,4 +123,18 @@ Samuel Frost   1:30This is a response.`;
     expect(result.entries[1].speaker).toBe("Samuel Frost");
     expect(result.entries[1].text).toBe("This is a response.");
   });
+
+  it("handles inline text starting with lowercase, digits, or non-ASCII", () => {
+    const inlineTranscript = `Test Transcript
+January 1, 2026, 12:00AM
+1h 0m 0s
+
+Speaker One   0:05all lowercase start here.
+Speaker Two   0:101st thing to mention.`;
+
+    const result = parseTranscript(inlineTranscript);
+    expect(result.entries.length).toBe(2);
+    expect(result.entries[0].text).toBe("all lowercase start here.");
+    expect(result.entries[1].text).toBe("1st thing to mention.");
+  });
 });
