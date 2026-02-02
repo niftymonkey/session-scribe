@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Calendar,
   Clock,
@@ -67,19 +67,30 @@ export function ParseReviewPanel({
   const hasDm = players.some((p) => p.role === "dm");
   const isReady = hasApiKey && hasDm;
 
-  // Calculate how many players are matched to saved config
-  const matchedCount = players.filter((p) => {
-    const match = getMatchType(p.playerName, savedPlayers);
-    return match.type !== "none";
-  }).length;
+  // Memoize match results for all players (avoids redundant O(n×m) calls in render)
+  const playerMatches = useMemo(
+    () => players.map((p) => getMatchType(p.playerName, savedPlayers)),
+    [players, savedPlayers]
+  );
 
-  const handleUpdatePlayer = (index: number, updates: Partial<PlayerConfig>) => {
-    onPlayersChange(players.map((p, i) => (i === index ? { ...p, ...updates } : p)));
-  };
+  const matchedCount = useMemo(
+    () => playerMatches.filter((m) => m.type !== "none").length,
+    [playerMatches]
+  );
 
-  const handleRemovePlayer = (index: number) => {
-    onPlayersChange(players.filter((_, i) => i !== index));
-  };
+  const handleUpdatePlayer = useCallback(
+    (index: number, updates: Partial<PlayerConfig>) => {
+      onPlayersChange(players.map((p, i) => (i === index ? { ...p, ...updates } : p)));
+    },
+    [players, onPlayersChange]
+  );
+
+  const handleRemovePlayer = useCallback(
+    (index: number) => {
+      onPlayersChange(players.filter((_, i) => i !== index));
+    },
+    [players, onPlayersChange]
+  );
 
   const handleAddPlayer = () => {
     if (!newPlayerName.trim()) return;
@@ -283,15 +294,16 @@ export function ParseReviewPanel({
 
               <div className="space-y-2">
                 {players.map((player, index) => {
-                  const match = getMatchType(player.playerName, savedPlayers);
+                  const match = playerMatches[index];
                   return (
                     <SpeakerConfigRow
                       key={`${player.playerName}-${index}`}
+                      index={index}
                       player={player}
                       matchType={match.type}
                       matchedTo={match.matchedTo}
-                      onChange={(updates) => handleUpdatePlayer(index, updates)}
-                      onRemove={() => handleRemovePlayer(index)}
+                      onChange={handleUpdatePlayer}
+                      onRemove={handleRemovePlayer}
                     />
                   );
                 })}

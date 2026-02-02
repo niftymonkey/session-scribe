@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { UserPlus, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,15 +26,19 @@ export function OutputPanel({
 }: OutputPanelProps) {
   const [savedNpcNames, setSavedNpcNames] = useState<Set<string>>(new Set());
 
-  // Find NPCs that aren't already saved
-  const newNpcs = detectedNpcs.filter((detected) => {
-    const normalizedName = detected.canonicalName.toLowerCase().trim();
-    return !savedNpcs.some(
-      (saved) =>
-        saved.name.toLowerCase().trim() === normalizedName ||
-        saved.aliases.some((a) => a.toLowerCase().trim() === normalizedName)
-    );
-  });
+  // Find NPCs that aren't already saved (memoized for performance)
+  const newNpcs = useMemo(
+    () =>
+      detectedNpcs.filter((detected) => {
+        const normalizedName = detected.canonicalName.toLowerCase().trim();
+        return !savedNpcs.some(
+          (saved) =>
+            saved.name.toLowerCase().trim() === normalizedName ||
+            saved.aliases.some((a) => a.toLowerCase().trim() === normalizedName)
+        );
+      }),
+    [detectedNpcs, savedNpcs]
+  );
 
   const handleSaveNpc = (npc: DetectedNPC) => {
     const npcConfig: NPCConfig = {

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Crown, Sword, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,14 +7,16 @@ import { MatchedBadge, type MatchType } from "./matched-badge";
 import type { PlayerConfig } from "@/types";
 
 interface SpeakerConfigRowProps {
+  index: number;
   player: PlayerConfig;
   matchType: MatchType;
   matchedTo?: string;
-  onChange: (updates: Partial<PlayerConfig>) => void;
-  onRemove: () => void;
+  onChange: (index: number, updates: Partial<PlayerConfig>) => void;
+  onRemove: (index: number) => void;
 }
 
-export function SpeakerConfigRow({
+export const SpeakerConfigRow = memo(function SpeakerConfigRow({
+  index,
   player,
   matchType,
   matchedTo,
@@ -34,7 +37,7 @@ export function SpeakerConfigRow({
       {/* Role toggle */}
       <button
         type="button"
-        onClick={() => onChange({ role: isDm ? "player" : "dm" })}
+        onClick={() => onChange(index, { role: isDm ? "player" : "dm" })}
         className={cn(
           "flex items-center justify-center w-8 h-8 rounded-lg transition-all shrink-0",
           isDm
@@ -51,7 +54,7 @@ export function SpeakerConfigRow({
         {/* Speaker/Player name */}
         <Input
           value={player.playerName}
-          onChange={(e) => onChange({ playerName: e.target.value })}
+          onChange={(e) => onChange(index, { playerName: e.target.value })}
           placeholder="Speaker name"
           className="h-8 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
         />
@@ -61,7 +64,7 @@ export function SpeakerConfigRow({
         {/* Character name */}
         <Input
           value={player.characterName ?? ""}
-          onChange={(e) => onChange({ characterName: e.target.value || null })}
+          onChange={(e) => onChange(index, { characterName: e.target.value || null })}
           placeholder={isDm ? "DM" : "Character"}
           className="h-8 flex-1 min-w-0 bg-transparent border-0 border-b border-border/30 rounded-none px-1 text-sm focus-visible:ring-0 focus-visible:border-accent/50 placeholder:text-muted-foreground/50"
         />
@@ -74,11 +77,11 @@ export function SpeakerConfigRow({
       <Button
         variant="ghost"
         size="icon"
-        onClick={onRemove}
+        onClick={() => onRemove(index)}
         className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 group-focus-within:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
-}
+});
