@@ -274,7 +274,7 @@ export function SettingsDialog({
                     <Label className="text-sm font-medium">AI Model</Label>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Choose the model for generating session recaps.
+                    Only text-capable models are shown, filtered to 400K+ context by default. Recommendations favor newer, cost-effective models.
                   </p>
                   <ModelSelector
                     value={selectedModel}
