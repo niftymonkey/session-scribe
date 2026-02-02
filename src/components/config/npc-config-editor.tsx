@@ -130,11 +130,11 @@ export function NPCConfigEditor({ npcs, onNpcsChange, detectedNPCs = [] }: NPCCo
                 className="flex items-center gap-2 p-2 rounded-md bg-card/50 border border-border/30"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">
+                  <div className="text-sm font-medium">
                     {detected.canonicalName}
                   </div>
                   {detected.variations.length > 0 && (
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="text-xs text-muted-foreground break-words">
                       Also heard as: {detected.variations.join(", ")}
                     </div>
                   )}

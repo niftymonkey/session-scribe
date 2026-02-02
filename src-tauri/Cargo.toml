@@ -1,6 +1,6 @@
 [package]
 name = "session-scribe"
-version = "0.1.0"
+version = "0.3.0"
 description = "Transform D&D session artifacts into polished narrative recaps"
 authors = ["niftymonkey"]
 edition = "2021"

@@ -257,17 +257,39 @@ function buildPlayerContext(playerMap: PlayerConfig[]): string {
   return context;
 }
 
+/**
+ * Find a player config by matching against speaker name.
+ * Checks playerName, characterName, and aliases (case-insensitive).
+ */
+function findPlayerBySpeaker(
+  speaker: string,
+  playerMap: PlayerConfig[]
+): PlayerConfig | undefined {
+  const speakerLower = speaker.toLowerCase();
+  return playerMap.find(
+    (p) =>
+      p.playerName.toLowerCase() === speakerLower ||
+      p.characterName?.toLowerCase() === speakerLower ||
+      p.aliases?.some((a) => a.toLowerCase() === speakerLower)
+  );
+}
+
 function formatTranscriptEntries(entries: TranscriptEntry[], playerMap: PlayerConfig[]): string {
   return entries
     .map(entry => {
-      const character = playerMap.find(
-        p => p.playerName.toLowerCase() === entry.speaker.toLowerCase()
-      );
-      const speakerLabel = character?.role === "dm"
-        ? `[DM] ${entry.speaker} (${character.characterName ?? "Dungeon Master"})`
-        : character?.characterName
-          ? `${entry.speaker} (${character.characterName})`
-          : entry.speaker;
+      const player = findPlayerBySpeaker(entry.speaker, playerMap);
+
+      let speakerLabel: string;
+      if (player?.role === "dm") {
+        // DM: Mark clearly as DM with their display name
+        speakerLabel = `[DM] ${player.characterName ?? "Dungeon Master"}`;
+      } else if (player) {
+        // Player: Use character name (consistent for narratives)
+        speakerLabel = player.characterName ?? entry.speaker;
+      } else {
+        // Unknown speaker: keep raw name
+        speakerLabel = entry.speaker;
+      }
 
       return `[${entry.timestamp}] ${speakerLabel}: ${entry.text}`;
     })

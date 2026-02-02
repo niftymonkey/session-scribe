@@ -36,12 +36,29 @@ export function parseDuration(duration: string): number {
 
 /**
  * Parse a date string like "January 12, 2026, 1:58AM" to a Date object
+ * Returns current date if parsing fails
  */
 function parseDate(dateString: string): Date {
+  if (!dateString.trim()) {
+    return new Date();
+  }
   // Remove trailing time portion if present and parse
   // "January 12, 2026, 1:58AM" -> "January 12, 2026"
   const cleaned = dateString.replace(/,\s*\d+:\d+[AP]M$/i, "");
-  return new Date(cleaned);
+  const parsed = new Date(cleaned);
+  // Return current date if parsing failed (Invalid Date)
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+/**
+ * Clean up session title from transcript
+ * Removes common suffixes like "Audio Transcript"
+ */
+function cleanSessionTitle(title: string): string {
+  return title
+    .replace(/\s*[-–—]\s*Audio Transcript$/i, "")
+    .replace(/\s+Audio Transcript$/i, "")
+    .trim();
 }
 
 /**
@@ -94,7 +111,8 @@ export function parseTranscript(content: string): TranscriptData {
   const lines = content.split("\n");
 
   // Parse header (first 3 lines)
-  const title = lines[0]?.trim() || "";
+  const rawTitle = lines[0]?.trim() || "";
+  const title = cleanSessionTitle(rawTitle);
   const dateStr = lines[1]?.trim() || "";
   const durationStr = lines[2]?.trim() || "";
 
