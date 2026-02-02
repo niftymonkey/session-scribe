@@ -130,11 +130,13 @@ January 1, 2026, 12:00AM
 1h 0m 0s
 
 Speaker One   0:05all lowercase start here.
-Speaker Two   0:101st thing to mention.`;
+Speaker Two   0:101st thing to mention.
+Speaker Three   0:15Über important point.`;
 
     const result = parseTranscript(inlineTranscript);
-    expect(result.entries.length).toBe(2);
+    expect(result.entries.length).toBe(3);
     expect(result.entries[0].text).toBe("all lowercase start here.");
     expect(result.entries[1].text).toBe("1st thing to mention.");
+    expect(result.entries[2].text).toBe("Über important point.");
   });
 });
