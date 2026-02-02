@@ -100,7 +100,7 @@ export function RecapDisplay({ recap }: RecapDisplayProps) {
     <div className="surface-card rounded-lg overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b border-border/30 text-center">
-        <h1 className="text-2xl text-glow" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1 className="text-2xl font-medium" style={{ fontFamily: 'var(--font-display)' }}>
           {recap.header.sessionTitle}
         </h1>
         <div className="flex items-center justify-center gap-3 mt-2 text-sm text-muted-foreground">
@@ -113,12 +113,9 @@ export function RecapDisplay({ recap }: RecapDisplayProps) {
           )}
         </div>
         {/* Metadata */}
-        {recap.metadata && recap.metadata.charactersPresent.length > 0 && (
+        {recap.metadata?.inGameTime && (
           <div className="mt-3 text-xs text-muted-foreground">
-            <span className="font-medium">Characters:</span> {recap.metadata.charactersPresent.join(", ")}
-            {recap.metadata.inGameTime && (
-              <span className="ml-3"><span className="font-medium">In-Game:</span> {recap.metadata.inGameTime}</span>
-            )}
+            <span className="font-medium">In-Game:</span> {recap.metadata.inGameTime}
           </div>
         )}
       </div>

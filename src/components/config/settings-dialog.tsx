@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings, Eye, EyeOff, Key, Map, Users, Cpu, Sparkles, UserCircle } from "lucide-react";
+import { Settings, Eye, EyeOff, Key, Map, Users, Cpu, Sparkles, UserCircle, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -240,7 +240,16 @@ export function SettingsDialog({
                     </Label>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Your key is stored locally and only sent to OpenAI for generation.
+                    Your key is stored locally and only sent to OpenAI for generation.{" "}
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      Get an API key
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </p>
                   <div className="relative">
                     <Input

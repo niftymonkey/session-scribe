@@ -127,19 +127,31 @@ async function runPass2(
       passName: "extraction",
       currentScene: 0,
       totalScenes: scenes.length,
-      message: `Pass 2: Extracting details for ${scenes.length} scenes (0/${scenes.length} complete)...`,
+      message: `Pass 2: Extracting ${scenes.length} scenes in parallel...`,
     });
 
     const results = await Promise.all(
       scenes.map(async (scene, index) => {
+        const sceneEntries = extractSceneEntries(entries, scene);
+        const isEmpty = sceneEntries.length === 0;
+
+        const startTime = performance.now();
         const result = await extractSceneDetails(model, systemPrompt, entries, scene, playerMap);
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+
+        // For empty scenes, yield to event loop so progress messages aren't lost
+        if (isEmpty) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
         completedCount++;
+        const timing = isEmpty ? "skipped - no entries" : `${elapsed}s`;
         onProgress?.({
           stage: "summarizing",
           passName: "extraction",
           currentScene: completedCount,
           totalScenes: scenes.length,
-          message: `Pass 2: Extracting details (${completedCount}/${scenes.length} complete)...`,
+          message: `Pass 2: [${completedCount}/${scenes.length}] "${scene.name}" (${timing})`,
         });
         return { index, result };
       })
@@ -152,8 +164,10 @@ async function runPass2(
   // For larger scene counts, process in batches to avoid rate limits
   const results: SceneDetails[] = [];
   let completedCount = 0;
+  const totalBatches = Math.ceil(scenes.length / PASS2_CONCURRENCY);
 
   for (let i = 0; i < scenes.length; i += PASS2_CONCURRENCY) {
+    const batchNum = Math.floor(i / PASS2_CONCURRENCY) + 1;
     const batch = scenes.slice(i, i + PASS2_CONCURRENCY);
 
     onProgress?.({
@@ -161,17 +175,37 @@ async function runPass2(
       passName: "extraction",
       currentScene: completedCount,
       totalScenes: scenes.length,
-      message: `Pass 2: Extracting scenes ${i + 1}-${Math.min(i + PASS2_CONCURRENCY, scenes.length)} (${completedCount}/${scenes.length} complete)...`,
+      message: `Pass 2: Batch ${batchNum}/${totalBatches} (${batch.length} scenes in parallel)...`,
     });
 
     const batchResults = await Promise.all(
-      batch.map((scene) =>
-        extractSceneDetails(model, systemPrompt, entries, scene, playerMap)
-      )
+      batch.map(async (scene) => {
+        const sceneEntries = extractSceneEntries(entries, scene);
+        const isEmpty = sceneEntries.length === 0;
+
+        const startTime = performance.now();
+        const result = await extractSceneDetails(model, systemPrompt, entries, scene, playerMap);
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+
+        // For empty scenes, yield to event loop so progress messages aren't lost
+        if (isEmpty) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
+        completedCount++;
+        const timing = isEmpty ? "skipped - no entries" : `${elapsed}s`;
+        onProgress?.({
+          stage: "summarizing",
+          passName: "extraction",
+          currentScene: completedCount,
+          totalScenes: scenes.length,
+          message: `Pass 2: [${completedCount}/${scenes.length}] "${scene.name}" (${timing})`,
+        });
+        return result;
+      })
     );
 
     results.push(...batchResults);
-    completedCount += batchResults.length;
   }
 
   return results;

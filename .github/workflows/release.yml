@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'D&D Session Summarizer ${{ github.ref_name }}'
+          releaseName: 'Session Scribe ${{ github.ref_name }}'
           releaseBody: 'Download the installer for your platform below.'
           releaseDraft: true
           prerelease: false

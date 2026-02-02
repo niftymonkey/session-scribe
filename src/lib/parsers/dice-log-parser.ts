@@ -94,6 +94,26 @@ export function parseRollBlock(block: string): DiceRoll | null {
 }
 
 /**
+ * Check if a line looks like a player header (ends with : and contains player info)
+ * e.g., "Liam AC:15 PP:15 DC:13:" or "Samuel Frost:" or "Torm the Lark:"
+ */
+function isPlayerHeader(line: string): boolean {
+  if (!line.endsWith(":")) return false;
+  // Must have some content before the colon (not just ":")
+  const content = line.slice(0, -1).trim();
+  if (!content) return false;
+  // Exclude known labels that aren't player headers
+  const knownLabels = ["Details", "Damage"];
+  if (knownLabels.includes(content)) return false;
+  // Skip GM lines (handled separately)
+  if (line.startsWith("Storyteller (GM):")) return true;
+  // Skip chat messages like "Gorgrin Snowstep:afk for a few"
+  // A proper header either has stats (AC:, PP:) or is just "Name:"
+  // Chat messages have text after the colon on the same line
+  return true;
+}
+
+/**
  * Parse a Roll20 dice log into structured data
  */
 export function parseDiceLog(content: string): DiceLogData {
@@ -109,69 +129,60 @@ export function parseDiceLog(content: string): DiceLogData {
   const charactersSet = new Set<string>();
   let rollCount = 0;
 
-  // Split content into blocks separated by ":" on its own line or double newlines
   const lines = content.split("\n");
   let currentBlock: string[] = [];
+
+  const processCurrentBlock = () => {
+    if (currentBlock.length > 0) {
+      const blockText = currentBlock.join("\n");
+      const roll = parseRollBlock(blockText);
+      if (roll) {
+        entries.push({ type: "roll", data: roll, raw: blockText });
+        charactersSet.add(roll.character);
+        rollCount++;
+      }
+      currentBlock = [];
+    }
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
+    // Skip empty lines
+    if (!line) continue;
+
     // Check for turn markers first
     const turnMarker = parseTurnMarker(line);
     if (turnMarker) {
-      // Process any accumulated block first
-      if (currentBlock.length > 0) {
-        const blockText = currentBlock.join("\n");
-        const roll = parseRollBlock(blockText);
-        if (roll) {
-          entries.push({ type: "roll", data: roll, raw: blockText });
-          charactersSet.add(roll.character);
-          rollCount++;
-        }
-        currentBlock = [];
-      }
-
+      processCurrentBlock();
       entries.push({ type: "turn", data: turnMarker, raw: line });
       continue;
     }
 
-    // Skip certain lines
+    // Skip certain special lines
     if (
       line === "⏪ POTEOT ⏩" ||
       line.startsWith("Round ") ||
       line === "Reset ↺" ||
       line === ":"
     ) {
-      // End current block if we have one
-      if (currentBlock.length > 0) {
-        const blockText = currentBlock.join("\n");
-        const roll = parseRollBlock(blockText);
-        if (roll) {
-          entries.push({ type: "roll", data: roll, raw: blockText });
-          charactersSet.add(roll.character);
-          rollCount++;
-        }
-        currentBlock = [];
-      }
+      processCurrentBlock();
       continue;
     }
 
-    // Accumulate lines for the current block
-    if (line) {
-      currentBlock.push(line);
+    // Check if this line is a player header (starts a new block)
+    // But only if we already have content in the current block
+    if (currentBlock.length > 0 && isPlayerHeader(line)) {
+      // This is a new block starting - process the previous one first
+      processCurrentBlock();
     }
+
+    // Accumulate lines for the current block
+    currentBlock.push(line);
   }
 
   // Process final block
-  if (currentBlock.length > 0) {
-    const blockText = currentBlock.join("\n");
-    const roll = parseRollBlock(blockText);
-    if (roll) {
-      entries.push({ type: "roll", data: roll, raw: blockText });
-      charactersSet.add(roll.character);
-      rollCount++;
-    }
-  }
+  processCurrentBlock();
 
   return {
     entries,

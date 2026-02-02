@@ -20,14 +20,11 @@ export function RecapPanel({ state, recap, progress, error }: RecapPanelProps) {
     return (
       <div className="surface-card rounded-lg p-8">
         <div className="flex flex-col items-center justify-center py-8 gap-6">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-accent/15 animate-ping" />
-            <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 animate-pulse-glow">
-              <Loader2 className="h-7 w-7 text-accent animate-spin" />
-            </div>
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 border border-accent/20">
+            <Loader2 className="h-6 w-6 text-accent animate-spin" />
           </div>
           <div className="text-center space-y-2">
-            <h3 className="text-lg text-glow" style={{ fontFamily: 'var(--font-display)' }}>
+            <h3 className="text-lg font-medium" style={{ fontFamily: 'var(--font-display)' }}>
               Chronicling Your Adventure
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -78,7 +75,7 @@ export function RecapPanel({ state, recap, progress, error }: RecapPanelProps) {
       <div className="space-y-4 animate-fade-in">
         <div className="flex items-center justify-between">
           <h2 className="text-lg" style={{ fontFamily: 'var(--font-display)' }}>
-            Session Chronicle
+            Session Recap
           </h2>
           <RecapActions recap={recap} />
         </div>
