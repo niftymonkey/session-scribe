@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { readTextFile } from "@tauri-apps/plugin-fs";
-import { parseTranscript, parseDiceLog } from "@/lib/parsers";
+import { readTextFile, readFile } from "@tauri-apps/plugin-fs";
+import { parseTranscript, parseDiceLog, extractTextFromDocx } from "@/lib/parsers";
 import type { TranscriptData, DiceLogData } from "@/types";
 
 export type ImportState = "idle" | "loading" | "success" | "error";
@@ -36,7 +36,9 @@ export function useFileImport(): UseFileImportResult {
       const filePath = await open({
         multiple: false,
         filters: [
+          { name: "Transcript Files", extensions: ["txt", "docx"] },
           { name: "Text Files", extensions: ["txt"] },
+          { name: "Word Documents", extensions: ["docx"] },
           { name: "All Files", extensions: ["*"] },
         ],
         title: "Select Transcript File",
@@ -47,7 +49,19 @@ export function useFileImport(): UseFileImportResult {
         return;
       }
 
-      const content = await readTextFile(filePath as string);
+      const path = filePath as string;
+      const isDocx = path.toLowerCase().endsWith(".docx");
+
+      let content: string;
+      if (isDocx) {
+        const bytes = await readFile(path);
+        content = await extractTextFromDocx(
+          bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+        );
+      } else {
+        content = await readTextFile(path);
+      }
+
       const parsed = parseTranscript(content);
 
       if (parsed.entries.length === 0) {
