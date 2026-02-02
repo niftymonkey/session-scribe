@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const ZOOM_STEP = 0.1;
 const MIN_ZOOM = 0.5;
@@ -11,6 +11,18 @@ export function useZoom() {
     return stored ? parseFloat(stored) : 1.0;
   });
 
+  const zoomIn = useCallback(() => {
+    setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP));
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    setZoom(1.0);
+  }, []);
+
   useEffect(() => {
     document.documentElement.style.fontSize = `${zoom * 100}%`;
     localStorage.setItem(STORAGE_KEY, zoom.toString());
@@ -22,13 +34,13 @@ export function useZoom() {
 
       if (e.key === "=" || e.key === "+") {
         e.preventDefault();
-        setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP));
+        zoomIn();
       } else if (e.key === "-") {
         e.preventDefault();
-        setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP));
+        zoomOut();
       } else if (e.key === "0") {
         e.preventDefault();
-        setZoom(1.0);
+        resetZoom();
       }
     };
 
@@ -37,9 +49,9 @@ export function useZoom() {
 
       e.preventDefault();
       if (e.deltaY < 0) {
-        setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP));
+        zoomIn();
       } else {
-        setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP));
+        zoomOut();
       }
     };
 
@@ -50,7 +62,7 @@ export function useZoom() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("wheel", handleWheel);
     };
-  }, []);
+  }, [zoomIn, zoomOut, resetZoom]);
 
-  return zoom;
+  return { zoom, zoomIn, zoomOut, resetZoom, canZoomIn: zoom < MAX_ZOOM, canZoomOut: zoom > MIN_ZOOM };
 }

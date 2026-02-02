@@ -103,53 +103,42 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Custom utilities */
 @layer utilities {
-  /* Surface card effect - layered depth */
+  /* Surface card effect - clean with subtle depth */
   .surface-card {
-    background: linear-gradient(
-      145deg,
-      oklch(0.17 0.028 275) 0%,
-      oklch(0.15 0.025 278) 50%,
-      oklch(0.16 0.027 273) 100%
-    );
-    box-shadow:
-      inset 0 1px 0 oklch(0.25 0.02 275 / 0.2),
-      0 4px 12px oklch(0.08 0.02 280 / 0.4),
-      0 1px 3px oklch(0.08 0.02 280 / 0.2);
+    background: oklch(0.16 0.025 275);
+    border: 1px solid oklch(0.24 0.02 275 / 0.5);
+    box-shadow: 0 2px 8px oklch(0.08 0.02 280 / 0.3);
   }
 
-  /* Soft glow effect for interactive elements */
+  /* Soft glow - now just a subtle lift shadow */
   .soft-glow {
-    box-shadow:
-      0 0 20px oklch(0.75 0.03 280 / 0.12),
-      0 0 40px oklch(0.75 0.03 280 / 0.08);
+    box-shadow: 0 2px 8px oklch(0.08 0.02 280 / 0.4);
   }
 
   /* Inset effect for input fields */
   .inset-field {
     background: oklch(0.13 0.02 280);
-    box-shadow:
-      inset 0 2px 4px oklch(0.08 0.015 280 / 0.4),
-      inset 0 1px 2px oklch(0.05 0.01 280 / 0.2);
+    border: 1px solid oklch(0.20 0.02 275 / 0.5);
+    box-shadow: inset 0 1px 2px oklch(0.08 0.015 280 / 0.3);
   }
 
-  /* Text glow for headings - silver/white */
+  /* Text glow - removed, now just slightly brighter */
   .text-glow {
-    text-shadow: 0 0 20px oklch(0.85 0.02 280 / 0.25);
+    color: oklch(0.95 0.01 280);
   }
 
   /* Subtle hover lift */
   .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
 
   .hover-lift:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 6px 16px oklch(0.08 0.02 280 / 0.4),
-      0 2px 4px oklch(0.08 0.02 280 / 0.2);
+    border-color: oklch(0.32 0.03 275 / 0.6);
+    box-shadow: 0 4px 12px oklch(0.08 0.02 280 / 0.4);
   }
 
-  /* Focus glow for interactive elements */
+  /* Focus ring for interactive elements - clean ring */
   .focus-glow {
     transition: box-shadow 0.2s ease;
   }
@@ -157,7 +146,7 @@ h1, h2, h3, h4, h5, h6 {
   .focus-glow:focus {
     box-shadow:
       0 0 0 2px oklch(0.12 0.02 280),
-      0 0 0 4px oklch(0.75 0.03 280 / 0.3);
+      0 0 0 3px oklch(0.55 0.08 280 / 0.5);
   }
 }
 
@@ -180,10 +169,10 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px oklch(0.75 0.03 280 / 0.12);
+    opacity: 1;
   }
   50% {
-    box-shadow: 0 0 30px oklch(0.75 0.03 280 / 0.2);
+    opacity: 0.85;
   }
 }
 
@@ -210,4 +199,73 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-gentle-pulse {
   animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* Phase container styles */
+.phase-container {
+  transition: all 0.5s ease-out;
+}
+
+.phase-locked {
+  opacity: 0.5;
+}
+
+.phase-locked .surface-card {
+  filter: grayscale(0.3);
+}
+
+.phase-available {
+  opacity: 0.85;
+}
+
+.phase-active {
+  opacity: 1;
+}
+
+.phase-active .surface-card {
+  border-color: oklch(0.40 0.06 280 / 0.6);
+  box-shadow: 0 4px 16px oklch(0.08 0.02 280 / 0.4);
+}
+
+.phase-complete {
+  opacity: 1;
+}
+
+/* Phase expand/collapse animations */
+@keyframes phase-expand {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 5000px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes phase-collapse {
+  from {
+    opacity: 1;
+    max-height: 5000px;
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+  }
+}
+
+/* Scrollbar for thin containers */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  border: none;
+}
+
+.scrollbar-thumb-border\/50::-webkit-scrollbar-thumb {
+  background: oklch(0.28 0.025 275 / 0.5);
 }

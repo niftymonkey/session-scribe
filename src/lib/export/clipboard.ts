@@ -35,16 +35,6 @@ export function recapToMarkdown(recap: SessionRecap): string {
   }
   lines.push("");
 
-  // Characters Present
-  if (recap.metadata?.charactersPresent?.length > 0) {
-    lines.push("## Characters Present");
-    lines.push("");
-    for (const character of recap.metadata.charactersPresent) {
-      lines.push(`- ${character}`);
-    }
-    lines.push("");
-  }
-
   // Opening Context
   if (recap.openingContext) {
     lines.push("## Opening Context");

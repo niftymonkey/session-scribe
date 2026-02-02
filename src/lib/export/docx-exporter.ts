@@ -52,19 +52,6 @@ export function createRecapDocument(recap: SessionRecap): Document {
     })
   );
 
-  // Characters present
-  if (recap.metadata?.charactersPresent?.length > 0) {
-    children.push(
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        children: [
-          new TextRun({ text: "Characters: ", bold: true, size: 20 }),
-          new TextRun({ text: recap.metadata.charactersPresent.join(", "), size: 20 }),
-        ],
-      })
-    );
-  }
-
   children.push(new Paragraph({ text: "" }));
 
   // Attendance
@@ -284,13 +271,15 @@ export function createRecapDocument(recap: SessionRecap): Document {
 /**
  * Export recap to DOCX file
  */
-export async function exportRecapToDocx(recap: SessionRecap): Promise<void> {
+export async function exportRecapToDocx(recap: SessionRecap, filename?: string): Promise<void> {
   const doc = createRecapDocument(recap);
   const blob = await Packer.toBlob(doc);
   const buffer = await blob.arrayBuffer();
 
   // Get save path from user
-  const defaultName = `${recap.header.sessionTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Recap.docx`;
+  const defaultName = filename
+    ? `${filename.replace(/[^a-zA-Z0-9\s-]/g, "_")}.docx`
+    : `${recap.header.sessionTitle.replace(/[^a-zA-Z0-9]/g, "_")}_Recap.docx`;
   const filePath = await save({
     defaultPath: defaultName,
     filters: [{ name: "Word Document", extensions: ["docx"] }],

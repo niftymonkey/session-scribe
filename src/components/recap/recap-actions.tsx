@@ -8,9 +8,10 @@ import type { SessionRecap } from "@/types";
 
 interface RecapActionsProps {
   recap: SessionRecap;
+  outputFilename?: string;
 }
 
-export function RecapActions({ recap }: RecapActionsProps) {
+export function RecapActions({ recap, outputFilename }: RecapActionsProps) {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -29,7 +30,7 @@ export function RecapActions({ recap }: RecapActionsProps) {
   const handleExport = async () => {
     try {
       setExporting(true);
-      await exportRecapToDocx(recap);
+      await exportRecapToDocx(recap, outputFilename);
       toast.success("Chronicle exported to DOCX");
     } catch (err) {
       console.error("Failed to export:", err);
