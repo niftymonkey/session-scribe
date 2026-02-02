@@ -1,13 +1,18 @@
 import type { OpenRouterModel, ParsedModel } from "@/types";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/models";
-const CACHE_KEY = "openrouter-models-cache";
+const CACHE_KEY = "openrouter-models-cache-v2"; // v2: added isRecommended field
 const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface CachedModels {
   models: ParsedModel[];
   timestamp: number;
 }
+
+// Recommendation algorithm constants
+const RECOMMENDED_CONTEXT_THRESHOLD = 400_000;
+const RECOMMENDED_COUNT = 3;
+const WEIGHTS = { recency: 0.45, cost: 0.45, context: 0.1 };
 
 // Fallback models if OpenRouter is unreachable
 const FALLBACK_MODELS: ParsedModel[] = [
@@ -18,6 +23,8 @@ const FALLBACK_MODELS: ParsedModel[] = [
     contextLength: 128000,
     promptPrice: 2.5,
     completionPrice: 10,
+    created: 1715299200,
+    isRecommended: true,
   },
   {
     id: "openai/gpt-4o-mini",
@@ -26,6 +33,8 @@ const FALLBACK_MODELS: ParsedModel[] = [
     contextLength: 128000,
     promptPrice: 0.15,
     completionPrice: 0.6,
+    created: 1721260800,
+    isRecommended: true,
   },
   {
     id: "openai/gpt-4-turbo",
@@ -34,12 +43,15 @@ const FALLBACK_MODELS: ParsedModel[] = [
     contextLength: 128000,
     promptPrice: 10,
     completionPrice: 30,
+    created: 1699315200,
+    isRecommended: true,
   },
 ];
 
-function parseOpenRouterModels(rawModels: OpenRouterModel[]): ParsedModel[] {
+export function parseOpenRouterModels(rawModels: OpenRouterModel[]): ParsedModel[] {
   return rawModels
     .filter((m) => m.id.startsWith("openai/"))
+    .filter((m) => m.architecture?.output_modalities?.includes("text"))
     .map((m) => ({
       id: m.id,
       modelId: m.id.replace("openai/", ""),
@@ -47,9 +59,66 @@ function parseOpenRouterModels(rawModels: OpenRouterModel[]): ParsedModel[] {
       contextLength: m.context_length,
       promptPrice: parseFloat(m.pricing.prompt) * 1_000_000,
       completionPrice: parseFloat(m.pricing.completion) * 1_000_000,
+      created: m.created ?? 0,
+      isRecommended: false,
     }))
-    .filter((m) => !m.modelId.includes("realtime") && !m.modelId.includes("audio"))
     .sort((a, b) => b.contextLength - a.contextLength);
+}
+
+export function calculateRecommendationScore(
+  model: ParsedModel,
+  allModels: ParsedModel[]
+): number {
+  const createdValues = allModels.map((m) => m.created);
+  const contextValues = allModels.map((m) => m.contextLength);
+  const priceValues = allModels.map((m) => m.promptPrice);
+
+  const maxCreated = Math.max(...createdValues);
+  const minCreated = Math.min(...createdValues);
+  const maxContext = Math.max(...contextValues);
+  const minContext = Math.min(...contextValues);
+  const maxPrice = Math.max(...priceValues);
+  const minPrice = Math.min(...priceValues);
+
+  const recencyScore =
+    (model.created - minCreated) / (maxCreated - minCreated || 1);
+  const contextScore =
+    (model.contextLength - minContext) / (maxContext - minContext || 1);
+  // Invert cost so cheaper = higher score
+  const costScore =
+    1 - (model.promptPrice - minPrice) / (maxPrice - minPrice || 1);
+
+  return (
+    WEIGHTS.recency * recencyScore +
+    WEIGHTS.cost * costScore +
+    WEIGHTS.context * contextScore
+  );
+}
+
+export function markRecommendedModels(models: ParsedModel[]): ParsedModel[] {
+  if (models.length === 0) return [];
+
+  // Filter to large context, exclude nano tier
+  const candidates = models.filter(
+    (m) =>
+      m.contextLength >= RECOMMENDED_CONTEXT_THRESHOLD &&
+      !m.modelId.includes("nano")
+  );
+
+  // Score and sort
+  const scored = candidates
+    .map((m) => ({ model: m, score: calculateRecommendationScore(m, candidates) }))
+    .sort((a, b) => b.score - a.score);
+
+  // Top 3 are recommended
+  const recommendedIds = new Set(
+    scored.slice(0, RECOMMENDED_COUNT).map((s) => s.model.id)
+  );
+
+  return models.map((m) => ({
+    ...m,
+    isRecommended: recommendedIds.has(m.id),
+  }));
 }
 
 function getCachedModels(): ParsedModel[] | null {
@@ -95,7 +164,8 @@ export async function fetchModels(): Promise<ParsedModel[]> {
     }
 
     const data = await response.json();
-    const models = parseOpenRouterModels(data.data as OpenRouterModel[]);
+    const parsed = parseOpenRouterModels(data.data as OpenRouterModel[]);
+    const models = markRecommendedModels(parsed);
 
     if (models.length > 0) {
       setCachedModels(models);
